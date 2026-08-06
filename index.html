@@ -170,24 +170,24 @@
 
     <script>
         let selectedRole = null;
-        let selectedMaleVoice = null;
+        let selectedFemaleVoice = null;
 
-        // Dynamic OS/Browser Male Voice Selector
+        // Dynamic Female Voice Selector
         function loadVoices() {
             if (!('speechSynthesis' in window)) return;
             const voices = window.speechSynthesis.getVoices();
             
-            // Search criteria for common male voice names across Windows, macOS, Android, & Chrome
-            selectedMaleVoice = voices.find(v => 
+            // Prioritize common female English voices across major browsers / OS
+            selectedFemaleVoice = voices.find(v => 
                 v.lang.startsWith('en') && (
-                    v.name.includes('David') || 
-                    v.name.includes('Mark') || 
-                    v.name.includes('George') || 
-                    v.name.includes('Alex') || 
-                    v.name.includes('Daniel') || 
-                    v.name.includes('Guy') || 
-                    v.name.includes('Male') ||
-                    v.name.includes('Google US English')
+                    v.name.includes('Samantha') || 
+                    v.name.includes('Zira') || 
+                    v.name.includes('Victoria') || 
+                    v.name.includes('Karen') || 
+                    v.name.includes('Jenny') || 
+                    v.name.includes('Female') || 
+                    v.name.includes('Google US English') ||
+                    v.name.includes('Cortana')
                 )
             ) || voices.find(v => v.lang.startsWith('en'));
         }
@@ -313,9 +313,8 @@
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;
             
-            // Assign Male Voice if loaded
-            if (selectedMaleVoice) {
-                utterance.voice = selectedMaleVoice;
+            if (selectedFemaleVoice) {
+                utterance.voice = selectedFemaleVoice;
             }
             
             utterance.onend = function() {
@@ -375,7 +374,7 @@
                     } 
                     else if (negatives.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
-                        botSpeak("Let's try again.", function() {
+                        botSpeak("Take 2, listening.", function() {
                             resetTriage();
                             startDictation();
                         });
