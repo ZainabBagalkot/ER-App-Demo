@@ -245,7 +245,7 @@
             text = text
                 .replace(/\bfe\s+mail\b/gi, 'female')
                 .replace(/\bmail\b/gi, 'male')
-                .replace(/\b(\d{1,3})\s*(?:over|by)\s*(\d{1,3})\b/gi, '$1/$2') // e.g., "90 over 60" or "90 by 60" -> 90/60
+                .replace(/\b(\d{1,3})\s*(?:over|by)\s*(\d{1,3})\b/gi, '$1/$2') 
                 .replace(/\bheart rate\b/gi, 'HR')
                 .replace(/\bblood pressure\b/gi, 'BP')
                 .replace(/\boxygen\b/gi, 'O2')
@@ -325,16 +325,25 @@
                     const input = normalizedText.toLowerCase().trim();
                     if (!input) return;
 
-                    const negations = ['no', 'incorrect', 'wrong', 'scratch', 'restart', 'cancel', 'nope', 'stop'];
+                    const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear'];
+                    const negatives = ['no', 'incorrect', 'wrong', 'nope', 'not right'];
                     const affirmatives = ['yes', 'correct', 'right', 'confirm', 'sure', 'save', 'yeah'];
 
-                    if (negations.some(word => input.includes(word))) {
+                    // 1. Explicit Cancel/Reset command
+                    if (cancels.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
-                        botSpeak("Scrapping dictation. Restarting microphone.", function() {
+                        resetTriage();
+                    } 
+                    // 2. Negative/Correction response -> Retry dictation
+                    else if (negatives.some(word => input.includes(word))) {
+                        try { recognition.abort(); } catch(e){}
+                        botSpeak("Let's try again.", function() {
                             resetTriage();
                             startDictation();
                         });
-                    } else if (affirmatives.some(word => input.includes(word))) {
+                    } 
+                    // 3. Affirmative response -> Save and acknowledge
+                    else if (affirmatives.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
                         processConfirmationSuccess();
                     }
@@ -403,14 +412,14 @@
             document.getElementById('review-actions').classList.remove('hidden');
 
             document.getElementById('triage-status').className = "bg-blue-50 border border-blue-200 text-blue-600 rounded-lg p-3 mb-4 text-center font-bold text-sm";
-            document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Reading back complete dictation for confirmation...';
+            document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Listening for confirmation...';
 
-            const fullReadBack = `Readback confirmation: ${finalCleanText}. Say yes to confirm or no to restart.`;
+            const simpleReadBack = `Did you say: ${finalCleanText}?`;
             
-            botSpeak(fullReadBack, function() {
+            botSpeak(simpleReadBack, function() {
                 mode = 'confirming';
                 fullTranscriptStore = ''; 
-                document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-ear-listen text-blue-600 mr-2 animate-bounce"></i>Listening for confirmation... Say "YES" or "NO"';
+                document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-ear-listen text-blue-600 mr-2 animate-bounce"></i>Listening...';
                 try { recognition.start(); } catch(e){}
             });
         }
@@ -419,15 +428,15 @@
         function parseUniversalClinicalText(text) {
             const lower = text.toLowerCase();
 
-            // 1. ADVANCED DEMOGRAPHICS PARSER (Handles 62M, M62, 71F, F16, 62 male, etc.)
+            // 1. DEMOGRAPHICS PARSER
             let age = "";
             let gender = "";
 
             const demoPatterns = [
-                /\b(\d{1,3})\s*([mf])\b/i,                     // 62M, 71F, 16F
-                /\b([mf])\s*(\d{1,3})\b/i,                     // M62, F71, F16
-                /\b(\d{1,3})\s*(?:year|yo|y\/o)?\s*(male|female)\b/i, // 62 year old male
-                /\b(male|female)\s*(\d{1,3})\b/i               // male 62
+                /\b(\d{1,3})\s*([mf])\b/i,                     
+                /\b([mf])\s*(\d{1,3})\b/i,                     
+                /\b(\d{1,3})\s*(?:year|yo|y\/o)?\s*(male|female)\b/i, 
+                /\b(male|female)\s*(\d{1,3})\b/i               
             ];
 
             for (let pat of demoPatterns) {
@@ -467,7 +476,7 @@
             // 3. VITALS & BIOMARKER PARSER
             let vitals = [];
             
-            // Blood Pressure (e.g., BP 90/60, BP 200/105, 90 over 60)
+            // BP
             const bpMatch = text.match(/(?:bp|blood pressure)?\s*(\d{2,3}\/\d{2,3})/i);
             let sysBP = 120, diaBP = 80;
             if (bpMatch) {
@@ -477,7 +486,7 @@
                 diaBP = parseInt(parts[1]);
             }
 
-            // Heart Rate (e.g., HR 110, HR 125, heart rate 55)
+            // HR
             const hrMatch = text.match(/(?:hr|heart rate)\s*:?\s*(\d{2,3})/i);
             let hrVal = 75;
             if (hrMatch) {
@@ -485,7 +494,7 @@
                 vitals.push(`HR: ${hrVal}`);
             }
 
-            // Oxygen Saturation (e.g., O2 94%, O2 86% on 4L, sat 91%)
+            // O2
             const o2Match = text.match(/(?:o2|spo2|oxygen|sat)\s*:?\s*(\d{2,3})%?/i);
             let o2Val = 98;
             if (o2Match) {
@@ -509,18 +518,17 @@
                 vitals.push(`GCS: ${gcs}`);
             }
 
-            // Temperature / Fever
+            // Temp
             const tempMatch = text.match(/(?:fever|temp|temperature)\s*:?\s*(\d{2,3}(?:\.\d+)?)/i);
             if (tempMatch) vitals.push(`Temp: ${tempMatch[1]}°F`);
 
             extractedVitals = vitals.length > 0 ? vitals.join(' | ') : 'Vitals Stable / Not Stated';
 
-            // 4. ESI TRIAGE RED FLAGS EVALUATOR (Automated Universal Logic)
+            // 4. ESI TRIAGE RED FLAGS EVALUATOR
             let priority = 'Low';
             let tags = [];
             let examSummary = [];
 
-            // HEURISTIC CATEGORIES FOR CRITICAL EMERGENCIES (ESI 1 & 2)
             const isCriticalCardiac = lower.includes('stemi') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa');
             const isCriticalNeuro = lower.includes('stroke') || lower.includes('weakness') || lower.includes('facial droop') || lower.includes('aphasic') || lower.includes('unequal pupils') || gcs <= 13;
             const isCriticalResp = o2Val < 90 || lower.includes('tripoding') || lower.includes('2-word') || lower.includes('diminished') || lower.includes('silent') || lower.includes('wheezing') && lower.includes('swelling');
@@ -587,7 +595,7 @@
             document.getElementById('triage-status').className = "bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 mb-4 text-center font-bold text-sm";
             document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-check-double mr-2"></i>PATIENT HANDOFF SAVED TO QUEUE';
 
-            botSpeak("Handoff report confirmed and saved.", function() {
+            botSpeak("Copy, over.", function() {
                 addPatientToQueue(extractedName, extractedAge, extractedSummary, extractedPriority, extractedVitals);
                 setTimeout(resetTriage, 1200);
             });
