@@ -8,6 +8,8 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        <!-- QRCode.js Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
         @keyframes pulse-ring {
@@ -134,36 +136,167 @@
         </div>
     </div>
 
-    <!-- PATIENT VIEW -->
+        <!-- PATIENT VIEW -->
     <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 max-w-md mx-auto w-full shadow-2xl relative">
+        <!-- Header -->
         <div class="bg-white p-4 shadow flex justify-between items-center">
             <div>
                 <h1 class="text-xl font-bold">The ER</h1>
-                <p class="text-xs text-gray-500">Family Tracker: <span class="font-bold text-gray-800">James Henderson</span></p>
+                <p class="text-xs text-gray-500">Family Tracker: <span class="font-bold text-gray-800" id="patient-display-name">James Henderson</span></p>
             </div>
             <button onclick="logout()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-sign-out-alt"></i></button>
         </div>
 
-        <div class="bg-red-600 text-white p-4">
+        <!-- Status Banner -->
+        <div id="patient-status-banner" class="bg-red-600 text-white p-4">
             <div class="flex items-center gap-3">
                 <div class="bg-white text-red-600 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">
                     <i class="fa-solid fa-heart-pulse"></i>
                 </div>
                 <div>
-                    <h2 class="font-bold text-lg">Critical Emergency</h2>
-                    <p class="text-xs text-red-100">Cath Lab Activation Pending</p>
+                    <h2 class="font-bold text-lg" id="patient-status-title">Critical Emergency</h2>
+                    <p class="text-xs text-red-100" id="patient-status-subtitle">Cath Lab Activation Pending</p>
                 </div>
             </div>
         </div>
 
-        <div class="p-6 flex-1 overflow-y-auto">
-            <h3 class="font-bold text-gray-700 mb-4">Care Timeline</h3>
-            <div class="relative border-l-2 border-gray-200 ml-3 space-y-6">
-                <div class="relative pl-6">
-                    <div class="absolute -left-2 top-1 w-4 h-4 rounded-full bg-red-500 ring-4 ring-white"></div>
-                    <div class="font-bold text-gray-800 text-sm">Triage Assessment</div>
-                    <div class="text-xs text-gray-500">Just Now</div>
+        <!-- Tabs -->
+        <div class="bg-white border-b border-gray-200">
+            <div class="flex">
+                <button onclick="switchPatientTab('home')" id="tab-home" class="patient-tab flex-1 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600">
+                    Home
+                </button>
+                <button onclick="switchPatientTab('timeline')" id="tab-timeline" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Timeline
+                </button>
+                <button onclick="switchPatientTab('updates')" id="tab-updates" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Updates
+                </button>
+                <button onclick="switchPatientTab('contact')" id="tab-contact" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Contact
+                </button>
+                <button onclick="switchPatientTab('share')" id="tab-share" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
+                    Share
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="p-4 flex-1 overflow-y-auto">
+
+            <!-- HOME TAB -->
+            <div id="tab-content-home">
+                <h3 class="font-bold text-gray-700 mb-3 text-sm">Current Status</h3>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-4">
+                    <div class="flex items-center gap-3 mb-3">
+                        <div class="bg-red-100 text-red-600 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">
+                            <i class="fa-solid fa-heart-pulse"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm" id="home-status-title">Critical Emergency</div>
+                            <div class="text-xs text-gray-500" id="home-status-subtitle">Cath Lab Activation Pending</div>
+                        </div>
+                    </div>
+                    <div class="text-xs text-gray-600">
+                        <div class="mb-1"><span class="font-semibold">Last update:</span> <span id="home-last-update">10:28 AM</span></div>
+                        <div><span class="font-semibold">Next update in:</span> <span id="home-next-update">~15 minutes</span></div>
+                    </div>
                 </div>
+
+                <h3 class="font-bold text-gray-700 mb-3 text-sm">Quick Overview</h3>
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                    <div class="text-xs text-gray-600 space-y-2">
+                        <div><span class="font-semibold">Patient:</span> <span id="home-patient-name">James Henderson</span></div>
+                        <div><span class="font-semibold">Location:</span> Emergency Department, Main Hospital</div>
+                        <div><span class="font-semibold">Current stage:</span> Under Doctor Review</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TIMELINE TAB -->
+            <div id="tab-content-timeline" class="hidden">
+                <h3 class="font-bold text-gray-700 mb-3 text-sm">Care Timeline</h3>
+                <div class="relative border-l-2 border-gray-200 ml-3 space-y-6" id="care-timeline">
+                    <!-- Timeline items injected by JS -->
+                </div>
+            </div>
+
+            <!-- UPDATES TAB -->
+            <div id="tab-content-updates" class="hidden">
+                <h3 class="font-bold text-gray-700 mb-3 text-sm">Hospital Updates</h3>
+                <div class="space-y-3" id="updates-list">
+                    <!-- Update cards injected by JS -->
+                </div>
+            </div>
+
+            <!-- CONTACT TAB -->
+            <div id="tab-content-contact" class="hidden">
+                <h3 class="font-bold text-gray-700 mb-3 text-sm">Emergency Contact</h3>
+                <p class="text-xs text-gray-500 mb-3">This person will receive automatic updates about this ER visit.</p>
+
+                <div id="primary-contact-card" class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
+                    <div class="text-xs text-gray-500 mb-1">Primary Emergency Contact</div>
+                    <div class="font-bold text-gray-800 text-sm" id="primary-name">Sarah Henderson</div>
+                    <div class="text-xs text-gray-500"><span id="primary-relation">Spouse</span> • <span id="primary-phone">+971 50 123 4567</span></div>
+                </div>
+
+                <button onclick="openEditContactModal()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition mb-3">
+                    <i class="fa-solid fa-pen-to-square mr-2"></i>Edit Primary Contact
+                </button>
+
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <div class="text-xs text-blue-800 font-semibold mb-1">Simulate SMS to Primary Contact</div>
+                    <p class="text-xs text-blue-700 mb-2">In a real system, an SMS is sent when the patient is detected in the ER. For this demo, you can trigger a test message.</p>
+                    <button onclick="simulateSendSMS()" class="bg-blue-600 text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-blue-700">
+                        <i class="fa-solid fa-paper-plane mr-1"></i>Send Test SMS
+                    </button>
+                </div>
+            </div>
+
+                        <!-- SHARE TAB -->
+            <div id="tab-content-share" class="hidden">
+                <h3 class="font-bold text-gray-700 mb-2 text-sm">Share with Family</h3>
+                <p class="text-xs text-gray-500 mb-4">Scan this QR code or share the link so other family members can see live updates.</p>
+
+                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center">
+                    <div id="qrcode-container" class="w-40 h-40 bg-gray-100 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
+                        <!-- QR code will be generated here -->
+                    </div>
+                    <p class="text-xs text-gray-600 text-center mb-3">QR code for: <span class="font-bold" id="qr-patient-name">James Henderson</span></p>
+                    <div class="text-xs text-gray-500 mb-2 text-center">Link: <span id="share-link-text" class="break-all">https://the-er.app/family/abc123</span></div>
+                    <button onclick="copyShareLink()" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition mb-2">
+                        <i class="fa-solid fa-link mr-2"></i>Copy Share Link
+                    </button>
+                    <button onclick="downloadQRCode()" class="w-full bg-gray-700 text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition">
+                        <i class="fa-solid fa-download mr-2"></i>Download QR Code
+                    </button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Edit Primary Contact Modal -->
+        <div id="edit-contact-modal" class="hidden absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-4">
+                <h3 class="font-bold text-gray-800 mb-3 text-sm">Edit Primary Emergency Contact</h3>
+                <form id="edit-contact-form" class="space-y-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
+                        <input type="text" id="edit-contact-name" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Relationship</label>
+                        <input type="text" id="edit-contact-relation" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" placeholder="e.g. Spouse, Parent" required>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-700 mb-1">Phone Number</label>
+                        <input type="tel" id="edit-contact-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" placeholder="+971..." required>
+                    </div>
+                    <div class="flex gap-2 pt-2">
+                        <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300">Cancel</button>
+                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">Save Changes</button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -207,10 +340,11 @@
             e.preventDefault();
             if (!selectedRole) return alert("Please select a role first!");
             document.getElementById('view-login').classList.add('hidden');
-            if (selectedRole === 'staff') {
+                        if (selectedRole === 'staff') {
                 document.getElementById('view-staff').classList.remove('hidden');
             } else {
                 document.getElementById('view-patient').classList.remove('hidden');
+                initPatientView();
             }
         });
 
@@ -686,6 +820,212 @@
             document.getElementById('extracted-meta').classList.add('hidden');
             document.getElementById('review-actions').classList.add('hidden');
             document.getElementById('detected-tags').classList.add('hidden');
+        }
+                // PATIENT / FAMILY INTERFACE
+
+        let currentPatientTab = 'home';
+
+        let primaryContact = {
+            name: 'Sarah Henderson',
+            relation: 'Spouse',
+            phone: '+971547259678'
+        };
+
+        let careTimelineEvents = [
+            { title: 'Arrived at ER', time: '10:05 AM', type: 'info' },
+            { title: 'Vital Signs Taken', time: '10:12 AM', type: 'warning' },
+            { title: 'ECG Completed', time: '10:20 AM', type: 'success' },
+            { title: 'Doctor Review Started', time: '10:28 AM', type: 'info' }
+        ];
+
+        let hospitalUpdates = [
+            { title: 'Your relative is being assessed', time: '10:15 AM', text: 'The ER team is currently evaluating the patient.' },
+            { title: 'Tests have been ordered', time: '10:22 AM', text: 'Blood tests and an ECG have been requested.' }
+        ];
+
+        function switchPatientTab(tab) {
+            currentPatientTab = tab;
+
+            ['home', 'timeline', 'updates', 'contact', 'share'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const content = document.getElementById(`tab-content-${t}`);
+                if (t === tab) {
+                    btn.classList.remove('text-gray-500');
+                    btn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
+                    content.classList.remove('hidden');
+                } else {
+                    btn.classList.add('text-gray-500');
+                    btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
+                    content.classList.add('hidden');
+                }
+            });
+        }
+
+        function renderPatientTimeline() {
+            const container = document.getElementById('care-timeline');
+            container.innerHTML = '';
+
+            careTimelineEvents.forEach(evt => {
+                let colorClass = 'bg-gray-300';
+                if (evt.type === 'warning') colorClass = 'bg-orange-500';
+                if (evt.type === 'success') colorClass = 'bg-green-500';
+                if (evt.type === 'info') colorClass = 'bg-blue-500';
+
+                const item = document.createElement('div');
+                item.className = 'relative pl-6';
+                item.innerHTML = `
+                    <div class="absolute -left-2 top-1 w-4 h-4 rounded-full ${colorClass} ring-4 ring-white"></div>
+                    <div class="font-bold text-gray-800 text-sm">${evt.title}</div>
+                    <div class="text-xs text-gray-500">${evt.time}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function renderUpdatesList() {
+            const container = document.getElementById('updates-list');
+            container.innerHTML = '';
+
+            hospitalUpdates.forEach(u => {
+                const card = document.createElement('div');
+                card.className = 'bg-white border border-gray-200 rounded-lg p-3 shadow-sm';
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-1">
+                        <div class="font-bold text-gray-800 text-sm">${u.title}</div>
+                        <div class="text-xs text-gray-400">${u.time}</div>
+                    </div>
+                    <div class="text-xs text-gray-600">${u.text}</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function renderPrimaryContact() {
+            document.getElementById('primary-name').innerText = primaryContact.name;
+            document.getElementById('primary-relation').innerText = primaryContact.relation;
+            document.getElementById('primary-phone').innerText = primaryContact.phone;
+
+            // Pre-fill edit form
+            document.getElementById('edit-contact-name').value = primaryContact.name;
+            document.getElementById('edit-contact-relation').value = primaryContact.relation;
+            document.getElementById('edit-contact-phone').value = primaryContact.phone;
+        }
+
+        function openEditContactModal() {
+            document.getElementById('edit-contact-modal').classList.remove('hidden');
+        }
+
+        function closeEditContactModal() {
+            document.getElementById('edit-contact-modal').classList.add('hidden');
+        }
+
+        document.getElementById('edit-contact-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            primaryContact.name = document.getElementById('edit-contact-name').value.trim();
+            primaryContact.relation = document.getElementById('edit-contact-relation').value.trim();
+            primaryContact.phone = document.getElementById('edit-contact-phone').value.trim();
+
+            renderPrimaryContact();
+            closeEditContactModal();
+        });
+
+        function simulateSendSMS() {
+    const phone = primaryContact.phone;
+    const message =
+`The ER: Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
+
+This message contains a secure link to view live updates about their condition:
+https://the-er.app/family/abc123
+
+A unique QR code is also available inside the app for sharing with other family members.`;
+
+    alert(
+        'DEMO SMS PREVIEW\n\n' +
+        'To: ' + phone + '\n\n' +
+        message +
+        '\n\n(In a real deployment, this would be sent via an SMS gateway like Twilio.)'
+    );
+}
+
+        function simulateSendSMS() {
+            const msg =
+`SMS to ${primaryContact.name} (${primaryContact.phone}):
+
+Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
+
+This message contains a secure link to view live updates about their condition.
+Link: https://the-er.app/family/abc123
+
+A unique QR code is also available inside the app for sharing with other family members.`;
+
+            alert('TEST SMS SENT\n\n' + msg);
+        }
+
+        function copyShareLink() {
+            const fakeLink = 'https://the-er.app/family/abc123';
+            navigator.clipboard.writeText(fakeLink).then(() => {
+                alert('Share link copied! Send it to your family members.');
+            }).catch(() => {
+                alert('Link: ' + fakeLink);
+            });
+        }
+
+                let qrCodeObj = null;
+
+        function generateQRCode() {
+            const container = document.getElementById('qrcode-container');
+            container.innerHTML = ''; // clear old
+
+            const shareLink = 'https://the-er.app/family/abc123';
+
+            qrCodeObj = new QRCode(container, {
+                text: shareLink,
+                width: 160,
+                height: 160,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadQRCode() {
+            const container = document.getElementById('qrcode-container');
+            const canvas = container.querySelector('canvas');
+            if (!canvas) {
+                alert('QR code not generated yet.');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'ER_Family_Share_QR.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+                function initPatientView() {
+            const patientName = 'James Henderson';
+            document.getElementById('patient-display-name').innerText = patientName;
+            document.getElementById('qr-patient-name').innerText = patientName;
+            document.getElementById('home-patient-name').innerText = patientName;
+
+            const banner = document.getElementById('patient-status-banner');
+            const title = document.getElementById('patient-status-title');
+            const subtitle = document.getElementById('patient-status-subtitle');
+
+            banner.className = 'bg-red-600 text-white p-4';
+            title.innerText = 'Critical Emergency';
+            subtitle.innerText = 'Cath Lab Activation Pending';
+
+            document.getElementById('home-status-title').innerText = 'Critical Emergency';
+            document.getElementById('home-status-subtitle').innerText = 'Cath Lab Activation Pending';
+
+            renderPatientTimeline();
+            renderUpdatesList();
+            renderPrimaryContact();
+            switchPatientTab('home');
+
+            // Generate QR code for Share tab
+            generateQRCode();
         }
     </script>
 </body>
