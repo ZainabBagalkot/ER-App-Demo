@@ -17,6 +17,8 @@
         }
         .recording-pulse { animation: pulse-ring 2s infinite; }
         .hidden { display: none !important; }
+        .patient-card { cursor: grab; }
+        .patient-card:active { cursor: grabbing; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col">
@@ -68,28 +70,32 @@
         
         <!-- Patient Queue -->
         <div class="w-full md:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col h-[90vh]">
-            <h2 class="text-xl font-bold mb-4 flex items-center justify-between border-b pb-2">
+            <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
                 <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
                 <button onclick="logout()" class="text-sm text-gray-400 hover:text-red-500"><i class="fa-solid fa-sign-out-alt"></i></button>
             </h2>
+            <p class="text-xs text-gray-400 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
             
             <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative">
+                <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative group transition-all" draggable="true">
                     <div class="flex justify-between font-bold items-center pr-6">
                         <span>James Henderson, 62M</span> 
                         <span class="text-red-600 text-xs px-2 py-0.5 bg-red-100 rounded-full">CRITICAL</span>
                     </div>
-                    <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Substernal Pain</div>
+                    <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Chest Pain</div>
                     <div class="text-xs text-gray-600 mt-1">BP 90/60 | HR 110 | SpO2 94%</div>
+                    <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
+                        <i class="fa-solid fa-xmark text-base"></i>
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Voice Assistant -->
         <div class="w-full md:w-2/3 bg-white rounded-xl shadow p-6 flex flex-col">
-            <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>Clinical Handoff Voice Engine</h2>
+            <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>ER Triage Assistant</h2>
             <p class="text-gray-500 mb-4 text-xs">
-                Dictate natural clinical handoffs (e.g. "James Henderson 49M ate peanuts 10 mins ago given aspirin BP 90 over 60").
+                Dictate natural clinical handoffs (e.g. "James Henderson 49M chest pain and shortness of breath BP 90 over 60").
             </p>
 
             <div id="triage-status" class="bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 transition-all text-sm">
@@ -170,26 +176,26 @@
 
     <script>
         let selectedRole = null;
-        let selectedFemaleVoice = null;
+        let selectedBritishVoice = null;
 
-        // Dynamic Female Voice Selector
+        // Dynamic British Female Voice Selector
         function loadVoices() {
             if (!('speechSynthesis' in window)) return;
             const voices = window.speechSynthesis.getVoices();
             
-            // Prioritize common female English voices across major browsers / OS
-            selectedFemaleVoice = voices.find(v => 
-                v.lang.startsWith('en') && (
-                    v.name.includes('Samantha') || 
-                    v.name.includes('Zira') || 
+            selectedBritishVoice = voices.find(v => 
+                (v.lang === 'en-GB' || v.lang.startsWith('en_GB')) && (
+                    v.name.includes('Hazel') || 
                     v.name.includes('Victoria') || 
-                    v.name.includes('Karen') || 
-                    v.name.includes('Jenny') || 
+                    v.name.includes('Sonia') || 
+                    v.name.includes('Mia') || 
                     v.name.includes('Female') || 
-                    v.name.includes('Google US English') ||
-                    v.name.includes('Cortana')
+                    v.name.includes('Google UK English Female') ||
+                    v.name.includes('UK')
                 )
-            ) || voices.find(v => v.lang.startsWith('en'));
+            ) || voices.find(v => v.lang === 'en-GB')
+              || voices.find(v => v.name.includes('Samantha') || v.name.includes('Victoria'))
+              || voices.find(v => v.lang.startsWith('en'));
         }
 
         if ('speechSynthesis' in window) {
@@ -224,6 +230,7 @@
             resetTriage();
         }
 
+        // Cancel / Remove Patient
         function removePatient(btn) {
             const card = btn.closest('.patient-card');
             if (card) {
@@ -233,6 +240,40 @@
                 setTimeout(() => card.remove(), 300);
             }
         }
+
+        // Drag & Drop Reordering for Queue
+        function initQueueDragAndDrop() {
+            const queueList = document.getElementById('patient-queue-list');
+            let draggedCard = null;
+
+            queueList.addEventListener('dragstart', (e) => {
+                const card = e.target.closest('.patient-card');
+                if (card) {
+                    draggedCard = card;
+                    e.dataTransfer.effectAllowed = 'move';
+                    setTimeout(() => card.classList.add('opacity-40'), 0);
+                }
+            });
+
+            queueList.addEventListener('dragend', (e) => {
+                const card = e.target.closest('.patient-card');
+                if (card) card.classList.remove('opacity-40');
+                draggedCard = null;
+            });
+
+            queueList.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'move';
+                const targetCard = e.target.closest('.patient-card');
+                if (targetCard && targetCard !== draggedCard) {
+                    const rect = targetCard.getBoundingClientRect();
+                    const next = (e.clientY - rect.top) / (rect.bottom - rect.top) > 0.5;
+                    queueList.insertBefore(draggedCard, next ? targetCard.nextSibling : targetCard);
+                }
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', initQueueDragAndDrop);
 
         function wordToNum(text) {
             const wordMap = {
@@ -292,6 +333,30 @@
             return text;
         }
 
+        // Check if spoken speech contains medical relevance
+        function isMedicalSpeech(text) {
+            const lower = text.toLowerCase();
+            const medicalTerms = [
+                'pain', 'chest', 'breath', 'shortness', 'heart', 'attack', 'stemi', 'stroke', 'sepsis',
+                'bp', 'blood pressure', 'hr', 'heart rate', 'spo2', 'o2', 'oxygen', 'sat', 'temp', 'fever',
+                'male', 'female', 'yo', 'year', 'old', 'patient', 'aspirin', 'epinephrine', 'nitro',
+                'nitroglycerin', 'albuterol', 'naloxone', 'morphine', 'fentanyl', 'heparin', 'plavix',
+                'tylenol', 'zofran', 'ativan', 'bleed', 'bleeding', 'fracture', 'trauma', 'mvc',
+                'allergy', 'anaphylaxis', 'peanuts', 'swelling', 'wheezing', 'gcs', 'lactate',
+                'dizzy', 'dizziness', 'fainting', 'syncope', 'seizure', 'nausea', 'vomiting', 'headache',
+                'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea'
+            ];
+            
+            let matchCount = 0;
+            medicalTerms.forEach(term => {
+                if (lower.includes(term)) matchCount++;
+            });
+
+            if (/\d+/.test(lower)) matchCount++;
+
+            return matchCount > 0;
+        }
+
         let recognition = null;
         let mode = 'idle'; 
         let fullTranscriptStore = '';
@@ -313,8 +378,8 @@
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;
             
-            if (selectedFemaleVoice) {
-                utterance.voice = selectedFemaleVoice;
+            if (selectedBritishVoice) {
+                utterance.voice = selectedBritishVoice;
             }
             
             utterance.onend = function() {
@@ -364,9 +429,24 @@
                     const input = normalizedText.toLowerCase().trim();
                     if (!input) return;
 
-                    const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear'];
-                    const negatives = ['no', 'incorrect', 'wrong', 'nope', 'not right'];
-                    const affirmatives = ['yes', 'correct', 'right', 'confirm', 'sure', 'save', 'yeah'];
+                    // Comprehensive list of cancellation triggers
+                    const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear', 'start over'];
+                    
+                    // Comprehensive list of negative triggers (checked BEFORE affirmatives to catch "not correct", "that's wrong", etc.)
+                    const negatives = [
+                        'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct', 
+                        'wrong', 'thats wrong', "that's wrong", 'that is wrong', 
+                        'not right', 'false', 'redo', 'retry', 'scratch', 'mistake', 'error', 'naw'
+                    ];
+                    
+                    // Comprehensive list of affirmative triggers
+                    const affirmatives = [
+                        'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive', 
+                        'correct', 'thats correct', "that's correct", 'that is correct', 
+                        'right', 'thats right', "that's right", 'that is right', 
+                        'sure', 'confirm', 'confirmed', 'save', 'sounds good', 'perfect', 
+                        'exact', 'exactly', 'spot on', 'roger', 'copy', '10 4', '10-4'
+                    ];
 
                     if (cancels.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
@@ -433,6 +513,19 @@
             micBtn.innerHTML = '<i class="fa-solid fa-microphone text-2xl"></i>';
 
             finalCleanText = normalizeTranscript(fullTranscriptStore).trim();
+
+            // Non-medical speech filter
+            if (!finalCleanText || !isMedicalSpeech(finalCleanText)) {
+                document.getElementById('transcript-box').innerText = finalCleanText || "(No speech detected)";
+                document.getElementById('triage-status').className = "bg-amber-50 border border-amber-300 text-amber-700 rounded-lg p-3 mb-4 text-center font-bold text-sm";
+                document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i>Non-clinical speech detected.';
+
+                botSpeak("Please remain professional.", function() {
+                    resetTriage();
+                });
+                return;
+            }
+
             document.getElementById('transcript-box').innerText = finalCleanText;
 
             parseUniversalClinicalText(finalCleanText);
@@ -497,7 +590,7 @@
             for (let pat of namePatterns) {
                 let match = text.match(pat);
                 if (match && match[1]) {
-                    let candidate = match[1].replace(/male|female|stemi|stroke|sepsis|trauma|ruptured/gi, '').trim();
+                    let candidate = match[1].replace(/male|female|stemi|stroke|sepsis|trauma|ruptured|chest|pain|shortness|breath|heart|attack|sob/gi, '').trim();
                     if (candidate.length > 3 && candidate.includes(' ')) {
                         name = candidate.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                         break;
@@ -564,9 +657,10 @@
             let tags = [];
             let examSummary = [];
 
-            const isCriticalCardiac = lower.includes('stemi') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa');
+            // Critical Symptom Recognition
+            const isCriticalCardiac = lower.includes('stemi') || lower.includes('chest pain') || lower.includes('heart attack') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa') || lower.includes('angina');
             const isCriticalNeuro = lower.includes('stroke') || lower.includes('weakness') || lower.includes('facial droop') || lower.includes('aphasic') || lower.includes('unequal pupils') || gcs <= 13;
-            const isCriticalResp = o2Val < 90 || lower.includes('tripoding') || lower.includes('2-word') || lower.includes('diminished') || lower.includes('silent') || lower.includes('wheezing') && lower.includes('swelling');
+            const isCriticalResp = o2Val < 90 || lower.includes('shortness of breath') || lower.includes('sob') || lower.includes('dyspnea') || lower.includes('difficulty breathing') || lower.includes("can't breathe") || lower.includes('tripoding') || lower.includes('2-word') || lower.includes('diminished') || lower.includes('silent') || (lower.includes('wheezing') && lower.includes('swelling'));
             const isCriticalSepsis = lactate >= 4.0 || (sysBP < 90 && (lower.includes('fever') || lower.includes('chemo') || lower.includes('lethargic')));
             const isCriticalTrauma = lower.includes('pelvic instability') || lower.includes('gross hematuria') || lower.includes('mvc') && gcs < 14;
             const isCriticalAnaphylaxis = lower.includes('anaphylaxis') || lower.includes('ate peanuts') || (lower.includes('hives') && lower.includes('swelling') && sysBP < 90);
@@ -579,7 +673,7 @@
 
                 if (isCriticalCardiac) {
                     tags.push({ label: 'CRITICAL: ACUTE CORONARY / VASCULAR EMERGENCY', color: 'bg-red-100 text-red-800 border-red-300' });
-                    examSummary.push(lower.includes('aaa') ? 'Ruptured AAA Suspicion' : 'Acute MI / Chest Pain');
+                    examSummary.push(lower.includes('heart attack') ? 'Suspected Acute Heart Attack' : 'Acute MI / Chest Pain');
                 }
                 if (isCriticalNeuro) {
                     tags.push({ label: 'CRITICAL: ACUTE NEUROLOGICAL DEFICIT / STROKE', color: 'bg-red-100 text-red-800 border-red-300' });
@@ -587,7 +681,7 @@
                 }
                 if (isCriticalResp) {
                     tags.push({ label: 'CRITICAL: RESPIRATORY FAILURE / AIRWAY RISK', color: 'bg-red-100 text-red-800 border-red-300' });
-                    examSummary.push('Severe Respiratory Distress');
+                    examSummary.push('Severe Respiratory Distress / SOB');
                 }
                 if (isCriticalSepsis) {
                     tags.push({ label: 'CRITICAL: SEPTIC SHOCK / HIGH LACTATE', color: 'bg-red-100 text-red-800 border-red-300' });
@@ -654,6 +748,7 @@
 
             const newCard = document.createElement('div');
             newCard.className = `patient-card border-l-4 ${colorBorder.split(' ')[0]} ${colorBorder.split(' ')[1]} p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
+            newCard.setAttribute('draggable', 'true');
             newCard.innerHTML = `
                 <div class="flex justify-between font-bold items-center pr-6">
                     <span class="text-gray-900">${name}${ageLabel}</span> 
