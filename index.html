@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    
+
     <style>
         @keyframes pulse-ring {
             0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
@@ -21,6 +21,7 @@
         .hidden { display: none !important; }
         .patient-card { cursor: grab; }
         .patient-card:active { cursor: grabbing; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
 <body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col">
@@ -52,7 +53,7 @@
                 <div class="space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Email / ID</label>
-                        <input type="text" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500" placeholder="Enter any text" required>
+                        <input type="text" id="login-id-val" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500" placeholder="Enter any text">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700">Password</label>
@@ -67,12 +68,11 @@
         </div>
     </div>
 
-    <!-- SIDE PANEL BACKDROP -->
+    <!-- SIDE PANEL BACKDROP (shared) -->
     <div id="side-panel-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
 
-    <!-- SIDE PANEL DRAWER -->
-    <div id="side-panel" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
-        <!-- Header -->
+    <!-- STAFF SIDE PANEL: Triage History -->
+    <div id="side-panel-staff" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="bg-blue-600 text-white p-5 flex justify-between items-center shadow">
             <div class="flex items-center gap-3 font-bold text-lg">
                 <i class="fa-solid fa-truck-medical text-2xl"></i>
@@ -83,7 +83,6 @@
             </button>
         </div>
 
-        <!-- Sidebar Navigation Bar -->
         <div class="p-4 bg-gray-50 border-b flex justify-between items-center gap-2">
             <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
                 <i class="fa-solid fa-clock-rotate-left mr-1 text-blue-600"></i> Triage History
@@ -93,20 +92,50 @@
             </button>
         </div>
 
-        <!-- History Panel Content -->
         <div class="flex-1 overflow-y-auto p-4 space-y-3" id="sidebar-history-container">
             <!-- Dynamic history cards inserted here -->
         </div>
 
-        <!-- Footer -->
         <div class="p-3 border-t bg-gray-50 text-xs text-gray-400 text-center">
             The ER Clinical System v2.0
         </div>
     </div>
 
+    <!-- PATIENT/FAMILY SIDE PANEL: Account Profile -->
+    <div id="side-panel-patient" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <div class="bg-blue-600 text-white p-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <h2 class="text-xl font-bold" id="side-user-name">Guest</h2>
+                    <p class="text-xs text-blue-100 uppercase tracking-widest font-bold">Account Profile</p>
+                </div>
+                <button onclick="toggleSidebar()"><i class="fa-solid fa-xmark text-xl"></i></button>
+            </div>
+        </div>
+
+        <div class="flex-1 p-5 overflow-y-auto">
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">My Emergency Contact</h3>
+            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-6">
+                <div class="text-sm font-bold text-gray-800" id="side-contact-name">Sarah Winsley</div>
+                <div class="text-xs text-gray-500">Primary Emergency Contact</div>
+                <div class="text-xs text-blue-600 font-bold mt-2" id="side-contact-phone">+971 55 888 7777</div>
+                <button onclick="openEditContactModal()" class="mt-4 text-[10px] font-bold text-blue-600 uppercase border-b border-blue-600 pb-0.5">Edit My Contact</button>
+            </div>
+
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Patients Relying on Me</h3>
+            <div id="sidebar-patient-list" class="space-y-2">
+                <!-- Mini list of patients -->
+            </div>
+        </div>
+
+        <div class="p-4 border-t bg-gray-50">
+            <button onclick="logout()" class="w-full py-2 bg-white text-red-500 border border-red-100 rounded-lg text-sm font-bold">Sign Out</button>
+        </div>
+    </div>
+
     <!-- STAFF VIEW -->
     <div id="view-staff" class="hidden flex-1 flex flex-col max-w-7xl mx-auto w-full p-4 gap-4">
-        
+
         <!-- Top Control Bar with Clickable Blue Logo Button -->
         <div class="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 flex justify-between items-center">
             <button onclick="toggleSidebar()" class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-300 shadow">
@@ -129,11 +158,11 @@
                     <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
                 </h2>
                 <p class="text-xs text-gray-400 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
-                
+
                 <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
                     <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
                         <div class="flex justify-between font-bold items-center pr-6">
-                            <span>James Henderson, 62M</span> 
+                            <span>James Henderson, 62M</span>
                             <span class="text-red-600 text-xs px-2 py-0.5 bg-red-100 rounded-full">CRITICAL</span>
                         </div>
                         <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Chest Pain</div>
@@ -201,175 +230,152 @@
         </div>
     </div>
 
-    <!-- PATIENT VIEW -->
-    <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 max-w-md mx-auto w-full shadow-2xl relative">
-        <!-- Header -->
-        <div class="bg-white p-4 shadow flex justify-between items-center">
-            <div>
-                <h1 class="text-xl font-bold">The ER</h1>
-                <p class="text-xs text-gray-500">Family Tracker: <span class="font-bold text-gray-800" id="patient-display-name">James Henderson</span></p>
-            </div>
-            <button onclick="logout()" class="text-gray-400 hover:text-gray-700"><i class="fa-solid fa-sign-out-alt"></i></button>
+    <!-- PATIENT/FAMILY VIEW -->
+    <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 max-w-md mx-auto w-full shadow-2xl relative overflow-hidden">
+
+        <!-- Top Bar -->
+        <div class="bg-white p-4 shadow-sm flex justify-between items-center">
+            <h1 class="text-xl font-black text-gray-800" id="user-top-name">Guest</h1>
+            <button onclick="toggleSidebar()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                <i class="fa-solid fa-address-book text-lg"></i>
+            </button>
         </div>
 
-        <!-- Status Banner -->
-        <div id="patient-status-banner" class="bg-red-600 text-white p-4">
-            <div class="flex items-center gap-3">
-                <div class="bg-white text-red-600 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">
-                    <i class="fa-solid fa-heart-pulse"></i>
-                </div>
+        <div id="user-content-area" class="flex-1 flex flex-col overflow-y-auto">
+
+            <!-- HOME VIEW (LIST OF PATIENTS) -->
+            <div id="user-home-view" class="p-4 space-y-4">
                 <div>
-                    <h2 class="font-bold text-lg" id="patient-status-title">Critical Emergency</h2>
-                    <p class="text-xs text-red-100" id="patient-status-subtitle">Cath Lab Activation Pending</p>
+                    <h3 class="font-bold text-gray-800 text-sm"> Patient Status </h3>
+                    <p class="text-xs text-gray-500">Live triage and status updates for your assigned contacts.</p>
+                </div>
+                <div id="patient-summary-list" class="space-y-4">
+                    <!-- James Henderson card etc. -->
                 </div>
             </div>
-        </div>
 
-        <!-- Tabs -->
-        <div class="bg-white border-b border-gray-200">
-            <div class="flex">
-                <button onclick="switchPatientTab('home')" id="tab-home" class="patient-tab flex-1 py-3 text-sm font-semibold text-blue-600 border-b-2 border-blue-600">
-                    Home
+            <!-- DETAIL VIEW (SHOWN WHEN PATIENT CLICKED) -->
+            <div id="user-detail-view" class="hidden flex-1 flex flex-col">
+                <button onclick="closePatientDetail()" class="p-4 text-blue-600 text-xs font-bold flex items-center gap-2">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Patient List
                 </button>
-                <button onclick="switchPatientTab('timeline')" id="tab-timeline" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Timeline
-                </button>
-                <button onclick="switchPatientTab('updates')" id="tab-updates" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Updates
-                </button>
-                <button onclick="switchPatientTab('contact')" id="tab-contact" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Contact
-                </button>
-                <button onclick="switchPatientTab('share')" id="tab-share" class="patient-tab flex-1 py-3 text-sm font-semibold text-gray-500 hover:text-gray-700">
-                    Share
-                </button>
-            </div>
-        </div>
 
-        <!-- Content Area -->
-        <div class="p-4 flex-1 overflow-y-auto">
-
-            <!-- HOME TAB -->
-            <div id="tab-content-home">
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">Current Status</h3>
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm mb-4">
-                    <div class="flex items-center gap-3 mb-3">
-                        <div class="bg-red-100 text-red-600 rounded-full w-10 h-10 flex items-center justify-center font-bold text-xl">
-                            <i class="fa-solid fa-heart-pulse"></i>
-                        </div>
-                        <div>
-                            <div class="font-bold text-gray-800 text-sm" id="home-status-title">Critical Emergency</div>
-                            <div class="text-xs text-gray-500" id="home-status-subtitle">Cath Lab Activation Pending</div>
-                        </div>
+                <!-- Status Banner -->
+                <div id="detail-status-banner" class="p-4 flex items-center gap-4 text-white">
+                    <div id="detail-banner-icon" class="w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl">
+                        <i class="fa-solid fa-heart-pulse"></i>
                     </div>
-                    <div class="text-xs text-gray-600">
-                        <div class="mb-1"><span class="font-semibold">Last update:</span> <span id="home-last-update">10:28 AM</span></div>
-                        <div><span class="font-semibold">Next update in:</span> <span id="home-next-update">~15 minutes</span></div>
+                    <div>
+                        <h2 class="text-xl font-bold" id="detail-banner-title">Critical Emergency</h2>
+                        <p class="text-xs opacity-90" id="detail-banner-subtitle">Cath Lab Activation Pending</p>
                     </div>
                 </div>
 
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">Quick Overview</h3>
-                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
-                    <div class="text-xs text-gray-600 space-y-2">
-                        <div><span class="font-semibold">Patient:</span> <span id="home-patient-name">James Henderson</span></div>
-                        <div><span class="font-semibold">Location:</span> Emergency Department, Main Hospital</div>
-                        <div><span class="font-semibold">Current stage:</span> Under Doctor Review</div>
+                <!-- Tabs for Detail View -->
+                <div class="bg-white border-b flex">
+                    <button onclick="switchDetailTab('timeline')" id="dt-tab-timeline" class="detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600">TIMELINE</button>
+                    <button onclick="switchDetailTab('updates')" id="dt-tab-updates" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">UPDATES</button>
+                    <button onclick="switchDetailTab('share')" id="dt-tab-share" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">SHARE</button>
+                </div>
+
+                <div class="p-4 flex-1 overflow-y-auto">
+                    <div id="detail-content-timeline">
+                        <div class="relative border-l-2 border-gray-200 ml-3 space-y-6" id="detail-timeline-list"></div>
                     </div>
-                </div>
-            </div>
-
-            <!-- TIMELINE TAB -->
-            <div id="tab-content-timeline" class="hidden">
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">Care Timeline</h3>
-                <div class="relative border-l-2 border-gray-200 ml-3 space-y-6" id="care-timeline">
-                    <!-- Timeline items injected by JS -->
-                </div>
-            </div>
-
-            <!-- UPDATES TAB -->
-            <div id="tab-content-updates" class="hidden">
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">Hospital Updates</h3>
-                <div class="space-y-3" id="updates-list">
-                    <!-- Update cards injected by JS -->
-                </div>
-            </div>
-
-            <!-- CONTACT TAB -->
-            <div id="tab-content-contact" class="hidden">
-                <h3 class="font-bold text-gray-700 mb-3 text-sm">Emergency Contact</h3>
-                <p class="text-xs text-gray-500 mb-3">This person will receive automatic updates about this ER visit.</p>
-
-                <div id="primary-contact-card" class="bg-white border border-gray-200 rounded-lg p-4 mb-4">
-                    <div class="text-xs text-gray-500 mb-1">Primary Emergency Contact</div>
-                    <div class="font-bold text-gray-800 text-sm" id="primary-name">Sarah Henderson</div>
-                    <div class="text-xs text-gray-500"><span id="primary-relation">Spouse</span> • <span id="primary-phone">+971 50 123 4567</span></div>
-                </div>
-
-                <button onclick="openEditContactModal()" class="w-full bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700 transition mb-3">
-                    <i class="fa-solid fa-pen-to-square mr-2"></i>Edit Primary Contact
-                </button>
-
-                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                    <div class="text-xs text-blue-800 font-semibold mb-1">Simulate SMS to Primary Contact</div>
-                    <p class="text-xs text-blue-700 mb-2">In a real system, an SMS is sent when the patient is detected in the ER. For this demo, you can trigger a test message.</p>
-                    <button onclick="simulateSendSMS()" class="bg-blue-600 text-white px-3 py-2 rounded-md text-xs font-semibold hover:bg-blue-700">
-                        <i class="fa-solid fa-paper-plane mr-1"></i>Send Test SMS
-                    </button>
-                </div>
-            </div>
-
-            <!-- SHARE TAB -->
-            <div id="tab-content-share" class="hidden">
-                <h3 class="font-bold text-gray-700 mb-2 text-sm">Share with Family</h3>
-                <p class="text-xs text-gray-500 mb-4">Scan this QR code or share the link so other family members can see live updates.</p>
-
-                <div class="bg-white rounded-xl shadow p-4 flex flex-col items-center">
-                    <div id="qrcode-container" class="w-40 h-40 bg-gray-100 rounded-lg flex items-center justify-center mb-3 overflow-hidden">
-                        <!-- QR code will be generated here -->
+                    <div id="detail-content-updates" class="hidden space-y-3"></div>
+                    <div id="detail-content-share" class="hidden flex flex-col items-center">
+                        <p class="text-xs text-gray-500 mb-4 text-center">Share live tracking for <span class="active-p-name font-bold"></span> with other family members.</p>
+                        <div id="detail-qrcode" class="mb-4 bg-white p-2 rounded-lg border"></div>
+                        <button onclick="copyShareLink()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold">Copy Tracking Link</button>
                     </div>
-                    <p class="text-xs text-gray-600 text-center mb-3">QR code for: <span class="font-bold" id="qr-patient-name">James Henderson</span></p>
-                    <div class="text-xs text-gray-500 mb-2 text-center">Link: <span id="share-link-text" class="break-all">https://the-er.app/family/abc123</span></div>
-                    <button onclick="copyShareLink()" class="w-full bg-green-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-green-700 transition mb-2">
-                        <i class="fa-solid fa-link mr-2"></i>Copy Share Link
-                    </button>
-                    <button onclick="downloadQRCode()" class="w-full bg-gray-700 text-white py-2 rounded-lg text-sm font-semibold hover:bg-gray-800 transition">
-                        <i class="fa-solid fa-download mr-2"></i>Download QR Code
-                    </button>
                 </div>
             </div>
 
         </div>
+    </div>
 
-        <!-- Edit Primary Contact Modal -->
-        <div id="edit-contact-modal" class="hidden absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-            <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-4">
-                <h3 class="font-bold text-gray-800 mb-3 text-sm">Edit Primary Emergency Contact</h3>
-                <form id="edit-contact-form" class="space-y-3">
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="edit-contact-name" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Relationship</label>
-                        <input type="text" id="edit-contact-relation" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" placeholder="e.g. Spouse, Parent" required>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-medium text-gray-700 mb-1">Phone Number</label>
-                        <input type="tel" id="edit-contact-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-blue-500" placeholder="+971..." required>
-                    </div>
-                    <div class="flex gap-2 pt-2">
-                        <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-200 text-gray-700 py-2 rounded-lg text-sm font-semibold hover:bg-gray-300">Cancel</button>
-                        <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-semibold hover:bg-blue-700">Save Changes</button>
-                    </div>
-                </form>
-            </div>
+    <!-- Edit Contact Modal (Patient/Family) -->
+    <div id="edit-contact-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
+        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-5">
+            <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase">My Emergency Contact</h3>
+            <form id="edit-contact-form" class="space-y-4">
+                <input type="text" id="edit-name" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Contact Name" required>
+                <input type="text" id="edit-relation" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Relationship" required>
+                <input type="tel" id="edit-phone" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Phone Number" required>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-100 py-2 rounded-lg text-sm font-bold">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-bold">Save</button>
+                </div>
+            </form>
         </div>
     </div>
 
     <script>
+        /* =========================================================
+           SHARED: AUTH / ROLE SWITCHING / SIDEBAR ROUTING
+           ========================================================= */
         let selectedRole = null;
         let selectedBritishVoice = null;
         let isManuallyOrdered = false;
+
+        function selectRole(role) {
+            selectedRole = role;
+            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
+            document.getElementById(`role-${role}`).classList.add('border-blue-500', 'bg-blue-50');
+        }
+
+        document.getElementById('login-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            if (!selectedRole) return alert("Please select a role first!");
+
+            document.getElementById('view-login').classList.add('hidden');
+
+            if (selectedRole === 'staff') {
+                document.getElementById('view-staff').classList.remove('hidden');
+                sortQueueByPriority();
+            } else {
+                // Patient/Family: any name (or none) works — no specific name required.
+                const enteredName = document.getElementById('login-id-val').value.trim();
+                USER_DATA.name = enteredName || "Family Member";
+                document.getElementById('user-top-name').innerText = USER_DATA.name;
+                document.getElementById('side-user-name').innerText = USER_DATA.name;
+
+                document.getElementById('view-patient').classList.remove('hidden');
+                renderHomeList();
+            }
+        });
+
+        function logout() {
+            location.reload();
+        }
+
+        // Role-aware sidebar: staff sees triage history, patient/family sees account profile
+        function toggleSidebar() {
+            const isStaff = selectedRole === 'staff';
+            const panel = document.getElementById(isStaff ? 'side-panel-staff' : 'side-panel-patient');
+            const otherPanel = document.getElementById(isStaff ? 'side-panel-patient' : 'side-panel-staff');
+            const backdrop = document.getElementById('side-panel-backdrop');
+
+            // Always keep the non-active panel closed/off-screen
+            otherPanel.classList.add('-translate-x-full');
+
+            if (panel.classList.contains('-translate-x-full')) {
+                panel.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                if (isStaff) {
+                    updateTriageHistoryView();
+                } else {
+                    renderSidebarList();
+                }
+            } else {
+                panel.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        /* =========================================================
+           STAFF MODULE — Voice Triage Engine (unchanged from original)
+           ========================================================= */
 
         // 12-Hour AM/PM Timestamp Generator
         function get12HourTimestamp() {
@@ -382,34 +388,19 @@
             return `${hours}:${minutes} ${ampm}`;
         }
 
-        // Toggle Slide-out Navigation Sidebar
-        function toggleSidebar() {
-            const panel = document.getElementById('side-panel');
-            const backdrop = document.getElementById('side-panel-backdrop');
-            
-            if (panel.classList.contains('-translate-x-full')) {
-                panel.classList.remove('-translate-x-full');
-                backdrop.classList.remove('hidden');
-                updateTriageHistoryView();
-            } else {
-                panel.classList.add('-translate-x-full');
-                backdrop.classList.add('hidden');
-            }
-        }
-
         // Auto-Sorting Queue (Red -> Orange/Medium -> Blue/Low)
         function sortQueueByPriority() {
             if (isManuallyOrdered) return; // Keep manual nurse order if dragged
-            
+
             const queueList = document.getElementById('patient-queue-list');
             const cards = Array.from(queueList.querySelectorAll('.patient-card'));
-            
-            const priorityRank = { 
-                'CRITICAL': 1, 
-                'MEDIUM': 2, 
-                'MODERATE': 2, 
-                'ORANGE': 2, 
-                'LOW': 3 
+
+            const priorityRank = {
+                'CRITICAL': 1,
+                'MEDIUM': 2,
+                'MODERATE': 2,
+                'ORANGE': 2,
+                'LOW': 3
             };
 
             cards.sort((a, b) => {
@@ -434,7 +425,7 @@
         function updateTriageHistoryView() {
             const historyContainer = document.getElementById('sidebar-history-container');
             const activeCards = document.querySelectorAll('#patient-queue-list .patient-card');
-            
+
             if (activeCards.length === 0) {
                 historyContainer.innerHTML = `<div class="text-center text-gray-400 text-xs py-8">No triage history recorded yet.</div>`;
                 return;
@@ -478,14 +469,14 @@
         function loadVoices() {
             if (!('speechSynthesis' in window)) return;
             const voices = window.speechSynthesis.getVoices();
-            
-            selectedBritishVoice = voices.find(v => 
+
+            selectedBritishVoice = voices.find(v =>
                 (v.lang === 'en-GB' || v.lang.startsWith('en_GB')) && (
-                    v.name.includes('Hazel') || 
-                    v.name.includes('Victoria') || 
-                    v.name.includes('Sonia') || 
-                    v.name.includes('Mia') || 
-                    v.name.includes('Female') || 
+                    v.name.includes('Hazel') ||
+                    v.name.includes('Victoria') ||
+                    v.name.includes('Sonia') ||
+                    v.name.includes('Mia') ||
+                    v.name.includes('Female') ||
                     v.name.includes('Google UK English Female') ||
                     v.name.includes('UK')
                 )
@@ -497,35 +488,6 @@
         if ('speechSynthesis' in window) {
             window.speechSynthesis.onvoiceschanged = loadVoices;
             loadVoices();
-        }
-
-        function selectRole(role) {
-            selectedRole = role;
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
-            document.getElementById(`role-${role}`).classList.add('border-blue-500', 'bg-blue-50');
-        }
-
-        document.getElementById('login-form').addEventListener('submit', function(e) {
-            e.preventDefault();
-            if (!selectedRole) return alert("Please select a role first!");
-            document.getElementById('view-login').classList.add('hidden');
-            if (selectedRole === 'staff') {
-                document.getElementById('view-staff').classList.remove('hidden');
-                sortQueueByPriority();
-            } else {
-                document.getElementById('view-patient').classList.remove('hidden');
-                initPatientView();
-            }
-        });
-
-        function logout() {
-            document.getElementById('view-staff').classList.add('hidden');
-            document.getElementById('view-patient').classList.add('hidden');
-            document.getElementById('view-login').classList.remove('hidden');
-            selectedRole = null;
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
-            document.getElementById('login-form').reset();
-            resetTriage();
         }
 
         // Cancel / Remove Patient
@@ -590,7 +552,7 @@
             };
 
             let cleaned = text.toLowerCase().replace(/-/g, ' ');
-            
+
             Object.keys(wordMap).forEach(w1 => {
                 if (wordMap[w1] >= 20) {
                     Object.keys(wordMap).forEach(w2 => {
@@ -619,7 +581,7 @@
             text = text
                 .replace(/\bfe\s+mail\b/gi, 'female')
                 .replace(/\bmail\b/gi, 'male')
-                .replace(/\b(\d{1,3})\s*(?:over|by)\s*(\d{1,3})\b/gi, '$1/$2') 
+                .replace(/\b(\d{1,3})\s*(?:over|by)\s*(\d{1,3})\b/gi, '$1/$2')
                 .replace(/\bheart rate\b/gi, 'HR')
                 .replace(/\bblood pressure\b/gi, 'BP')
                 .replace(/\boxygen\b/gi, 'O2')
@@ -652,7 +614,7 @@
                 'dizzy', 'dizziness', 'fainting', 'syncope', 'seizure', 'nausea', 'vomiting', 'headache',
                 'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea', 'moderate', 'orange', 'medium', 'urgent'
             ];
-            
+
             let matchCount = 0;
             medicalTerms.forEach(term => {
                 if (lower.includes(term)) matchCount++;
@@ -664,10 +626,10 @@
         }
 
         let recognition = null;
-        let mode = 'idle'; 
+        let mode = 'idle';
         let fullTranscriptStore = '';
         let silenceTimer = null;
-        
+
         let extractedName = 'Unknown Patient';
         let extractedAge = '';
         let extractedVitals = '';
@@ -683,15 +645,15 @@
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;
-            
+
             if (selectedBritishVoice) {
                 utterance.voice = selectedBritishVoice;
             }
-            
+
             utterance.onend = function() {
                 if (callback) setTimeout(callback, 200);
             };
-            
+
             window.speechSynthesis.speak(utterance);
         }
 
@@ -699,7 +661,7 @@
 
         function initRecognition() {
             if (!SpeechRecognition) return;
-            
+
             recognition = new SpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
@@ -730,36 +692,36 @@
                             stopDictationAndReview();
                         }, 2500);
                     }
-                } 
+                }
                 else if (mode === 'confirming') {
                     const input = normalizedText.toLowerCase().trim();
                     if (!input) return;
 
                     const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear', 'start over'];
                     const negatives = [
-                        'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct', 
-                        'wrong', 'thats wrong', "that's wrong", 'that is wrong', 
+                        'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct',
+                        'wrong', 'thats wrong', "that's wrong", 'that is wrong',
                         'not right', 'false', 'redo', 'retry', 'scratch', 'mistake', 'error', 'naw'
                     ];
                     const affirmatives = [
-                        'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive', 
-                        'correct', 'thats correct', "that's correct", 'that is correct', 
-                        'right', 'thats right', "that's right", 'that is right', 
-                        'sure', 'confirm', 'confirmed', 'save', 'sounds good', 'perfect', 
+                        'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive',
+                        'correct', 'thats correct', "that's correct", 'that is correct',
+                        'right', 'thats right', "that's right", 'that is right',
+                        'sure', 'confirm', 'confirmed', 'save', 'sounds good', 'perfect',
                         'exact', 'exactly', 'spot on', 'roger', 'copy', '10 4', '10-4'
                     ];
 
                     if (cancels.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
                         resetTriage();
-                    } 
+                    }
                     else if (negatives.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
                         botSpeak("Take 2, listening.", function() {
                             resetTriage();
                             startDictation();
                         });
-                    } 
+                    }
                     else if (affirmatives.some(word => input.includes(word))) {
                         try { recognition.abort(); } catch(e){}
                         processConfirmationSuccess();
@@ -784,7 +746,7 @@
 
         function startDictation() {
             if (!recognition) initRecognition();
-            
+
             mode = 'dictating';
             fullTranscriptStore = '';
             clearTimeout(silenceTimer);
@@ -792,7 +754,7 @@
             document.getElementById('transcript-box').innerHTML = '<span class="text-blue-500 italic font-semibold animate-pulse">Listening... begin dictating patient report now.</span>';
             document.getElementById('triage-status').className = "bg-red-50 border border-red-300 text-red-600 rounded-lg p-3 mb-4 text-center font-bold text-sm";
             document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-microphone text-red-600 mr-2 animate-bounce"></i>DICTATION ACTIVE - Speak naturally...';
-            
+
             const micBtn = document.getElementById('mic-btn');
             micBtn.className = "bg-red-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-red-700 transition recording-pulse";
             micBtn.innerHTML = '<i class="fa-solid fa-stop text-2xl"></i>';
@@ -835,7 +797,7 @@
             document.getElementById('meta-vitals').innerText = extractedVitals || 'Unspecified';
             document.getElementById('meta-meds').innerText = extractedMeds || 'None Noted';
             document.getElementById('meta-exam').innerText = extractedExam || 'Standard Findings';
-            
+
             document.getElementById('extracted-meta').classList.remove('hidden');
             document.getElementById('detected-tags').classList.remove('hidden');
             document.getElementById('review-actions').classList.remove('hidden');
@@ -844,10 +806,10 @@
             document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-robot mr-2"></i>Listening for confirmation...';
 
             const simpleReadBack = `Did you say: ${finalCleanText}?`;
-            
+
             botSpeak(simpleReadBack, function() {
                 mode = 'confirming';
-                fullTranscriptStore = ''; 
+                fullTranscriptStore = '';
                 document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-ear-listen text-blue-600 mr-2 animate-bounce"></i>Listening...';
                 try { recognition.start(); } catch(e){}
             });
@@ -860,10 +822,10 @@
             let gender = "";
 
             const demoPatterns = [
-                /\b(\d{1,3})\s*([mf])\b/i,                     
-                /\b([mf])\s*(\d{1,3})\b/i,                     
-                /\b(\d{1,3})\s*(?:year|yo|y\/o)?\s*(male|female)\b/i, 
-                /\b(male|female)\s*(\d{1,3})\b/i               
+                /\b(\d{1,3})\s*([mf])\b/i,
+                /\b([mf])\s*(\d{1,3})\b/i,
+                /\b(\d{1,3})\s*(?:year|yo|y\/o)?\s*(male|female)\b/i,
+                /\b(male|female)\s*(\d{1,3})\b/i
             ];
 
             for (let pat of demoPatterns) {
@@ -900,7 +862,7 @@
             extractedName = name || "New Patient";
 
             let vitals = [];
-            
+
             const bpMatch = text.match(/(?:bp|blood pressure)?\s*(\d{2,3}\/\d{2,3})/i);
             let sysBP = 120, diaBP = 80;
             if (bpMatch) {
@@ -1003,17 +965,17 @@
                     tags.push({ label: 'CRITICAL: HEMODYNAMIC INSTABILITY / SHOCK', color: 'bg-red-100 text-red-800 border-red-300' });
                     examSummary.push('Severe Hypotension');
                 }
-            } 
+            }
             else if (isMediumPriority) {
                 priority = 'Medium';
                 tags.push({ label: 'MEDIUM / MODERATE RISK: URGENT MEDICAL EVALUATION', color: 'bg-orange-100 text-orange-800 border-orange-300' });
-                
+
                 if (lower.includes('moderate')) examSummary.push('Moderate Symptoms Detected');
                 else if (lower.includes('abdominal')) examSummary.push('Abdominal Pain / GI Concern');
                 else if (lower.includes('chest pain')) examSummary.push('Moderate Chest Discomfort');
                 else if (lower.includes('fracture')) examSummary.push('Possible Fracture / Trauma');
                 else examSummary.push('Urgent Vitals / Moderate Risk');
-            } 
+            }
             else {
                 priority = 'Low';
                 tags.push({ label: 'LOW RISK: STABLE / NON-EMERGENT', color: 'bg-blue-100 text-blue-800 border-blue-300' });
@@ -1048,7 +1010,7 @@
         function addPatientToQueue(name, age, summary, priority, vitals, meds) {
             const queueList = document.getElementById('patient-queue-list');
             const timestamp = get12HourTimestamp();
-            
+
             let normPrio = priority.toUpperCase();
             if (normPrio === 'MODERATE' || normPrio === 'ORANGE') normPrio = 'MEDIUM';
 
@@ -1075,7 +1037,7 @@
 
             newCard.innerHTML = `
                 <div class="flex justify-between font-bold items-center pr-6">
-                    <span class="text-gray-900">${name}${ageLabel}</span> 
+                    <span class="text-gray-900">${name}${ageLabel}</span>
                     <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} rounded-full uppercase">${normPrio}</span>
                 </div>
                 <div class="text-xs font-semibold text-gray-800 mt-1">${summary}</div>
@@ -1088,7 +1050,7 @@
                 </button>
             `;
 
-            queueList.prepend(newCard); 
+            queueList.prepend(newCard);
             sortQueueByPriority();
             updateTriageHistoryView();
         }
@@ -1099,7 +1061,7 @@
             clearTimeout(silenceTimer);
             mode = 'idle';
             fullTranscriptStore = '';
-            
+
             const micBtn = document.getElementById('mic-btn');
             micBtn.className = "bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition";
             micBtn.innerHTML = '<i class="fa-solid fa-microphone text-2xl"></i>';
@@ -1112,190 +1074,155 @@
             document.getElementById('detected-tags').classList.add('hidden');
         }
 
-        // PATIENT / FAMILY INTERFACE
-        let currentPatientTab = 'home';
+        /* =========================================================
+           PATIENT / FAMILY MODULE — Multi-patient dashboard
+           ========================================================= */
 
-        let primaryContact = {
-            name: 'Sarah Henderson',
-            relation: 'Spouse',
-            phone: '+971547259678'
+        const USER_DATA = {
+            name: "Family Member",
+            primaryContact: { name: "Sarah Winsley", relation: "Spouse", phone: "+971 55 888 7777" }
         };
 
-        let careTimelineEvents = [
-            { title: 'Arrived at ER', time: '10:05 AM', type: 'info' },
-            { title: 'Vital Signs Taken', time: '10:12 AM', type: 'warning' },
-            { title: 'ECG Completed', time: '10:20 AM', type: 'success' },
-            { title: 'Doctor Review Started', time: '10:28 AM', type: 'info' }
+        const PATIENTS_MAPPING = [
+            {
+                name: "James Henderson",
+                status: "Critical Emergency",
+                subtitle: "Cath Lab Activation Pending",
+                priority: "CRITICAL",
+                timeline: [
+                    { time: '10:05 AM', title: 'Admitted to ER', color: 'bg-blue-500' },
+                    { time: '10:20 AM', title: 'ECG Completed', color: 'bg-green-500' }
+                ],
+                updates: [
+                    { time: '10:28 AM', title: 'Clinical Review', text: 'Cardiologist has reviewed the STEMI protocol.' }
+                ]
+            },
+            {
+                name: "Lily Henderson",
+                status: "Stable / Monitoring",
+                subtitle: "Observation for Fever",
+                priority: "LOW",
+                timeline: [
+                    { time: '09:00 AM', title: 'Triage Completed', color: 'bg-green-500' }
+                ],
+                updates: [
+                    { time: '11:15 AM', title: 'Vitals Stable', text: 'Temperature reduced.' }
+                ]
+            }
         ];
 
-        let hospitalUpdates = [
-            { title: 'Your relative is being assessed', time: '10:15 AM', text: 'The ER team is currently evaluating the patient.' },
-            { title: 'Tests have been ordered', time: '10:22 AM', text: 'Blood tests and an ECG have been requested.' }
-        ];
+        let activeIdx = 0;
 
-        function switchPatientTab(tab) {
-            currentPatientTab = tab;
-
-            ['home', 'timeline', 'updates', 'contact', 'share'].forEach(t => {
-                const btn = document.getElementById(`tab-${t}`);
-                const content = document.getElementById(`tab-content-${t}`);
-                if (t === tab) {
-                    btn.classList.remove('text-gray-500');
-                    btn.classList.add('text-blue-600', 'border-b-2', 'border-blue-600');
-                    content.classList.remove('hidden');
-                } else {
-                    btn.classList.add('text-gray-500');
-                    btn.classList.remove('text-blue-600', 'border-b-2', 'border-blue-600');
-                    content.classList.add('hidden');
-                }
-            });
+        function renderSidebarList() {
+            const list = document.getElementById('sidebar-patient-list');
+            list.innerHTML = PATIENTS_MAPPING.map((p, i) => `
+                <div onclick="selectPatient(${i}); toggleSidebar();" class="p-3 bg-white border border-gray-100 rounded-lg text-xs cursor-pointer hover:bg-blue-50">
+                    <div class="font-bold">${p.name}</div>
+                    <div class="text-gray-400 font-bold uppercase text-[9px]">${p.status}</div>
+                </div>
+            `).join('');
         }
 
-        function renderPatientTimeline() {
-            const container = document.getElementById('care-timeline');
-            container.innerHTML = '';
-
-            careTimelineEvents.forEach(evt => {
-                let colorClass = 'bg-gray-300';
-                if (evt.type === 'warning') colorClass = 'bg-orange-500';
-                if (evt.type === 'success') colorClass = 'bg-green-500';
-                if (evt.type === 'info') colorClass = 'bg-blue-500';
-
-                const item = document.createElement('div');
-                item.className = 'relative pl-6';
-                item.innerHTML = `
-                    <div class="absolute -left-2 top-1 w-4 h-4 rounded-full ${colorClass} ring-4 ring-white"></div>
-                    <div class="font-bold text-gray-800 text-sm">${evt.title}</div>
-                    <div class="text-xs text-gray-500">${evt.time}</div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        function renderUpdatesList() {
-            const container = document.getElementById('updates-list');
-            container.innerHTML = '';
-
-            hospitalUpdates.forEach(u => {
-                const card = document.createElement('div');
-                card.className = 'bg-white border border-gray-200 rounded-lg p-3 shadow-sm';
-                card.innerHTML = `
-                    <div class="flex justify-between items-start mb-1">
-                        <div class="font-bold text-gray-800 text-sm">${u.title}</div>
-                        <div class="text-xs text-gray-400">${u.time}</div>
+        function renderHomeList() {
+            const container = document.getElementById('patient-summary-list');
+            container.innerHTML = PATIENTS_MAPPING.map((p, idx) => `
+                <div onclick="selectPatient(${idx})" class="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:border-blue-300">
+                    <div class="${p.priority === 'CRITICAL' ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'} w-12 h-12 rounded-full flex items-center justify-center text-xl">
+                        <i class="fa-solid ${p.priority === 'CRITICAL' ? 'fa-heart-pulse' : 'fa-user-check'}"></i>
                     </div>
-                    <div class="text-xs text-gray-600">${u.text}</div>
-                `;
-                container.appendChild(card);
-            });
+                    <div class="flex-1">
+                        <div class="flex justify-between items-center">
+                            <span class="font-bold text-gray-800">${p.name}</span>
+                            <span class="text-[9px] font-bold ${p.priority === 'CRITICAL' ? 'text-red-600' : 'text-blue-600'} uppercase">${p.priority}</span>
+                        </div>
+                        <div class="text-xs text-gray-500 mt-0.5">${p.status}</div>
+                    </div>
+                </div>
+            `).join('');
         }
 
-        function renderPrimaryContact() {
-            document.getElementById('primary-name').innerText = primaryContact.name;
-            document.getElementById('primary-relation').innerText = primaryContact.relation;
-            document.getElementById('primary-phone').innerText = primaryContact.phone;
+        function selectPatient(idx) {
+            activeIdx = idx;
+            const p = PATIENTS_MAPPING[idx];
+            document.getElementById('user-home-view').classList.add('hidden');
+            document.getElementById('user-detail-view').classList.remove('hidden');
 
-            document.getElementById('edit-contact-name').value = primaryContact.name;
-            document.getElementById('edit-contact-relation').value = primaryContact.relation;
-            document.getElementById('edit-contact-phone').value = primaryContact.phone;
+            // Banner Setup
+            const banner = document.getElementById('detail-status-banner');
+            const icon = document.getElementById('detail-banner-icon');
+            document.getElementById('detail-banner-title').innerText = p.status;
+            document.getElementById('detail-banner-subtitle').innerText = p.subtitle;
+            document.querySelectorAll('.active-p-name').forEach(el => el.innerText = p.name);
+
+            if (p.priority === 'CRITICAL') {
+                banner.className = "p-4 flex items-center gap-4 text-white bg-red-600";
+                icon.className = "w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl text-red-600";
+            } else {
+                banner.className = "p-4 flex items-center gap-4 text-white bg-blue-600";
+                icon.className = "w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl text-blue-600";
+            }
+
+            // Timeline
+            document.getElementById('detail-timeline-list').innerHTML = p.timeline.map(ev => `
+                <div class="relative pl-6">
+                    <div class="absolute -left-2 top-1 w-4 h-4 rounded-full ${ev.color} border-4 border-white"></div>
+                    <div class="text-xs font-bold text-gray-800">${ev.title}</div>
+                    <div class="text-[10px] text-gray-500">${ev.time}</div>
+                </div>
+            `).join('');
+
+            // Updates
+            document.getElementById('detail-content-updates').innerHTML = p.updates.map(u => `
+                <div class="bg-white border rounded-lg p-3">
+                    <div class="flex justify-between font-bold text-[11px] mb-1"><span>${u.title}</span><span class="text-gray-400">${u.time}</span></div>
+                    <div class="text-xs text-gray-600">${u.text}</div>
+                </div>
+            `).join('');
+
+            switchDetailTab('timeline');
+        }
+
+        function closePatientDetail() {
+            document.getElementById('user-home-view').classList.remove('hidden');
+            document.getElementById('user-detail-view').classList.add('hidden');
+        }
+
+        function switchDetailTab(tab) {
+            document.querySelectorAll('.detail-tab').forEach(t => t.className = "detail-tab flex-1 py-3 text-xs font-bold text-gray-400");
+            document.getElementById(`dt-tab-${tab}`).className = "detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600";
+
+            document.getElementById('detail-content-timeline').classList.add('hidden');
+            document.getElementById('detail-content-updates').classList.add('hidden');
+            document.getElementById('detail-content-share').classList.add('hidden');
+            document.getElementById(`detail-content-${tab}`).classList.remove('hidden');
+
+            if (tab === 'share') {
+                const qr = document.getElementById('detail-qrcode');
+                qr.innerHTML = "";
+                new QRCode(qr, { text: "https://the-er.app/v/" + activeIdx, width: 120, height: 120 });
+            }
         }
 
         function openEditContactModal() {
+            document.getElementById('edit-name').value = USER_DATA.primaryContact.name;
+            document.getElementById('edit-relation').value = USER_DATA.primaryContact.relation;
+            document.getElementById('edit-phone').value = USER_DATA.primaryContact.phone;
             document.getElementById('edit-contact-modal').classList.remove('hidden');
         }
-
-        function closeEditContactModal() {
-            document.getElementById('edit-contact-modal').classList.add('hidden');
-        }
+        function closeEditContactModal() { document.getElementById('edit-contact-modal').classList.add('hidden'); }
 
         document.getElementById('edit-contact-form').addEventListener('submit', function(e) {
             e.preventDefault();
-            primaryContact.name = document.getElementById('edit-contact-name').value.trim();
-            primaryContact.relation = document.getElementById('edit-contact-relation').value.trim();
-            primaryContact.phone = document.getElementById('edit-contact-phone').value.trim();
-
-            renderPrimaryContact();
+            USER_DATA.primaryContact.name = document.getElementById('edit-name').value.trim();
+            USER_DATA.primaryContact.relation = document.getElementById('edit-relation').value.trim();
+            USER_DATA.primaryContact.phone = document.getElementById('edit-phone').value.trim();
+            document.getElementById('side-contact-name').innerText = USER_DATA.primaryContact.name;
+            document.getElementById('side-contact-phone').innerText = USER_DATA.primaryContact.phone;
             closeEditContactModal();
         });
 
-        function simulateSendSMS() {
-            const msg =
-`SMS to ${primaryContact.name} (${primaryContact.phone}):
-
-Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
-
-This message contains a secure link to view live updates about their condition.
-Link: https://the-er.app/family/abc123
-
-A unique QR code is also available inside the app for sharing with other family members.`;
-
-            alert('TEST SMS SENT\n\n' + msg);
-        }
-
         function copyShareLink() {
-            const fakeLink = 'https://the-er.app/family/abc123';
-            navigator.clipboard.writeText(fakeLink).then(() => {
-                alert('Share link copied! Send it to your family members.');
-            }).catch(() => {
-                alert('Link: ' + fakeLink);
-            });
-        }
-
-        let qrCodeObj = null;
-
-        function generateQRCode() {
-            const container = document.getElementById('qrcode-container');
-            container.innerHTML = '';
-
-            const shareLink = 'https://the-er.app/family/abc123';
-
-            qrCodeObj = new QRCode(container, {
-                text: shareLink,
-                width: 160,
-                height: 160,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
-
-        function downloadQRCode() {
-            const container = document.getElementById('qrcode-container');
-            const canvas = container.querySelector('canvas');
-            if (!canvas) {
-                alert('QR code not generated yet.');
-                return;
-            }
-
-            const link = document.createElement('a');
-            link.download = 'ER_Family_Share_QR.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
-        function initPatientView() {
-            const patientName = 'James Henderson';
-            document.getElementById('patient-display-name').innerText = patientName;
-            document.getElementById('qr-patient-name').innerText = patientName;
-            document.getElementById('home-patient-name').innerText = patientName;
-
-            const banner = document.getElementById('patient-status-banner');
-            const title = document.getElementById('patient-status-title');
-            const subtitle = document.getElementById('patient-status-subtitle');
-
-            banner.className = 'bg-red-600 text-white p-4';
-            title.innerText = 'Critical Emergency';
-            subtitle.innerText = 'Cath Lab Activation Pending';
-
-            document.getElementById('home-status-title').innerText = 'Critical Emergency';
-            document.getElementById('home-status-subtitle').innerText = 'Cath Lab Activation Pending';
-
-            renderPatientTimeline();
-            renderUpdatesList();
-            renderPrimaryContact();
-            switchPatientTab('home');
-
-            generateQRCode();
+            alert("Secure Tracking Link Copied.");
         }
     </script>
 </body>
