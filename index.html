@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <!-- QRCode.js Library -->
+    <!-- QRCode.js Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     
     <style>
@@ -67,82 +67,138 @@
         </div>
     </div>
 
+    <!-- SIDE PANEL BACKDROP -->
+    <div id="side-panel-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
+
+    <!-- SIDE PANEL DRAWER -->
+    <div id="side-panel" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+        <!-- Header -->
+        <div class="bg-blue-600 text-white p-5 flex justify-between items-center shadow">
+            <div class="flex items-center gap-3 font-bold text-lg">
+                <i class="fa-solid fa-truck-medical text-2xl"></i>
+                <span>ER Operations</span>
+            </div>
+            <button onclick="toggleSidebar()" class="text-blue-100 hover:text-white text-xl">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar Navigation Bar -->
+        <div class="p-4 bg-gray-50 border-b flex justify-between items-center gap-2">
+            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
+                <i class="fa-solid fa-clock-rotate-left mr-1 text-blue-600"></i> Triage History
+            </span>
+            <button onclick="resetQueueSorting()" class="text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-100 shadow-sm transition" title="Restore Priority Sorting Order">
+                <i class="fa-solid fa-arrow-down-short-wide mr-1"></i> Auto-Sort
+            </button>
+        </div>
+
+        <!-- History Panel Content -->
+        <div class="flex-1 overflow-y-auto p-4 space-y-3" id="sidebar-history-container">
+            <!-- Dynamic history cards inserted here -->
+        </div>
+
+        <!-- Footer -->
+        <div class="p-3 border-t bg-gray-50 text-xs text-gray-400 text-center">
+            The ER Clinical System v2.0
+        </div>
+    </div>
+
     <!-- STAFF VIEW -->
-    <div id="view-staff" class="hidden flex-1 flex flex-col md:flex-row max-w-7xl mx-auto w-full p-4 gap-6">
+    <div id="view-staff" class="hidden flex-1 flex flex-col max-w-7xl mx-auto w-full p-4 gap-4">
         
-        <!-- Patient Queue -->
-        <div class="w-full md:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col h-[90vh]">
-            <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
-                <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
-                <button onclick="logout()" class="text-sm text-gray-400 hover:text-red-500"><i class="fa-solid fa-sign-out-alt"></i></button>
-            </h2>
-            <p class="text-xs text-gray-400 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
-            
-            <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative group transition-all" draggable="true">
-                    <div class="flex justify-between font-bold items-center pr-6">
-                        <span>James Henderson, 62M</span> 
-                        <span class="text-red-600 text-xs px-2 py-0.5 bg-red-100 rounded-full">CRITICAL</span>
+        <!-- Top Control Bar with Clickable Blue Logo Button -->
+        <div class="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 flex justify-between items-center">
+            <button onclick="toggleSidebar()" class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-300 shadow">
+                <i class="fa-solid fa-truck-medical text-2xl text-blue-200"></i>
+                <span class="text-lg">The ER</span>
+                <i class="fa-solid fa-bars text-sm ml-1 text-blue-200"></i>
+            </button>
+            <div class="flex items-center gap-3">
+                <span class="text-xs font-medium text-gray-500 hidden sm:inline"><i class="fa-solid fa-circle text-green-500 mr-1 text-[10px]"></i>Staff Active</span>
+                <button onclick="logout()" class="text-sm bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg border transition">
+                    <i class="fa-solid fa-sign-out-alt mr-1"></i>Sign Out
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 flex flex-col md:flex-row gap-6">
+            <!-- Patient Queue -->
+            <div class="w-full md:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col h-[82vh]">
+                <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
+                    <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
+                </h2>
+                <p class="text-xs text-gray-400 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
+                
+                <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
+                    <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
+                        <div class="flex justify-between font-bold items-center pr-6">
+                            <span>James Henderson, 62M</span> 
+                            <span class="text-red-600 text-xs px-2 py-0.5 bg-red-100 rounded-full">CRITICAL</span>
+                        </div>
+                        <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Chest Pain</div>
+                        <div class="text-xs text-gray-600 mt-1">BP 90/60 | HR 110 | SpO2 94%</div>
+                        <div class="text-[10px] text-gray-400 font-normal mt-1 flex items-center gap-1">
+                            <i class="fa-regular fa-clock"></i>10:05 AM
+                        </div>
+                        <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
+                            <i class="fa-solid fa-xmark text-base"></i>
+                        </button>
                     </div>
-                    <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Chest Pain</div>
-                    <div class="text-xs text-gray-600 mt-1">BP 90/60 | HR 110 | SpO2 94%</div>
-                    <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
-                        <i class="fa-solid fa-xmark text-base"></i>
+                </div>
+            </div>
+
+            <!-- Voice Assistant -->
+            <div class="w-full md:w-2/3 bg-white rounded-xl shadow p-6 flex flex-col">
+                <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>ER Triage Assistant</h2>
+                <p class="text-gray-500 mb-4 text-xs">
+                    Dictate natural clinical handoffs (e.g. "James Henderson 49M moderate chest pain BP 130 over 85").
+                </p>
+
+                <div id="triage-status" class="bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 transition-all text-sm">
+                    System Idle. Press the microphone button to start dictating.
+                </div>
+
+                <div class="flex-1 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
+                    <span class="text-gray-400 italic">Live transcript will appear here...</span>
+                </div>
+
+                <!-- Metadata Display -->
+                <div id="extracted-meta" class="hidden mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg grid grid-cols-2 gap-3 text-xs font-semibold text-blue-900">
+                    <div><i class="fa-solid fa-user mr-1 text-blue-600"></i> Name: <span id="meta-name" class="font-normal text-gray-800">--</span></div>
+                    <div><i class="fa-solid fa-cake-candles mr-1 text-blue-600"></i> Age/Gender: <span id="meta-age" class="font-normal text-gray-800">--</span></div>
+                    <div><i class="fa-solid fa-heart-pulse mr-1 text-blue-600"></i> Extracted Vitals: <span id="meta-vitals" class="font-normal text-gray-800">--</span></div>
+                    <div><i class="fa-solid fa-pills mr-1 text-blue-600"></i> Medications: <span id="meta-meds" class="font-normal text-gray-800">None Noted</span></div>
+                    <div class="col-span-2"><i class="fa-solid fa-stethoscope mr-1 text-blue-600"></i> Clinical Findings: <span id="meta-exam" class="font-normal text-gray-800">--</span></div>
+                </div>
+
+                <!-- Tags -->
+                <div id="detected-tags" class="hidden mb-4">
+                    <h3 class="font-bold text-gray-700 mb-2 text-xs uppercase tracking-wider">Clinical Triage Classification:</h3>
+                    <div id="tags-container" class="flex flex-wrap gap-2"></div>
+                </div>
+
+                <!-- Review Actions -->
+                <div id="review-actions" class="hidden flex justify-center gap-4 mb-2">
+                    <button onclick="manualConfirm()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 text-sm">
+                        <i class="fa-solid fa-check mr-2"></i> Confirm & Save
+                    </button>
+                    <button onclick="resetTriage()" class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-bold hover:bg-red-200 text-sm">
+                        <i class="fa-solid fa-rotate-right mr-2"></i> Scratch / Reset
+                    </button>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-col items-center pb-1 mt-auto">
+                    <button id="mic-btn" onclick="toggleDictation()" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
+                        <i class="fa-solid fa-microphone text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
-
-        <!-- Voice Assistant -->
-        <div class="w-full md:w-2/3 bg-white rounded-xl shadow p-6 flex flex-col">
-            <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>ER Triage Assistant</h2>
-            <p class="text-gray-500 mb-4 text-xs">
-                Dictate natural clinical handoffs (e.g. "James Henderson 49M chest pain and shortness of breath BP 90 over 60").
-            </p>
-
-            <div id="triage-status" class="bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 transition-all text-sm">
-                System Idle. Press the microphone button to start dictating.
-            </div>
-
-            <div class="flex-1 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
-                <span class="text-gray-400 italic">Live transcript will appear here...</span>
-            </div>
-
-            <!-- Metadata Display -->
-            <div id="extracted-meta" class="hidden mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg grid grid-cols-2 gap-3 text-xs font-semibold text-blue-900">
-                <div><i class="fa-solid fa-user mr-1 text-blue-600"></i> Name: <span id="meta-name" class="font-normal text-gray-800">--</span></div>
-                <div><i class="fa-solid fa-cake-candles mr-1 text-blue-600"></i> Age/Gender: <span id="meta-age" class="font-normal text-gray-800">--</span></div>
-                <div><i class="fa-solid fa-heart-pulse mr-1 text-blue-600"></i> Extracted Vitals: <span id="meta-vitals" class="font-normal text-gray-800">--</span></div>
-                <div><i class="fa-solid fa-pills mr-1 text-blue-600"></i> Medications: <span id="meta-meds" class="font-normal text-gray-800">None Noted</span></div>
-                <div class="col-span-2"><i class="fa-solid fa-stethoscope mr-1 text-blue-600"></i> Clinical Findings: <span id="meta-exam" class="font-normal text-gray-800">--</span></div>
-            </div>
-
-            <!-- Tags -->
-            <div id="detected-tags" class="hidden mb-4">
-                <h3 class="font-bold text-gray-700 mb-2 text-xs uppercase tracking-wider">Clinical Triage Classification:</h3>
-                <div id="tags-container" class="flex flex-wrap gap-2"></div>
-            </div>
-
-            <!-- Review Actions -->
-            <div id="review-actions" class="hidden flex justify-center gap-4 mb-2">
-                <button onclick="manualConfirm()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 text-sm">
-                    <i class="fa-solid fa-check mr-2"></i> Confirm & Save
-                </button>
-                <button onclick="resetTriage()" class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-bold hover:bg-red-200 text-sm">
-                    <i class="fa-solid fa-rotate-right mr-2"></i> Scratch / Reset
-                </button>
-            </div>
-
-            <!-- Controls -->
-            <div class="flex flex-col items-center pb-1 mt-auto">
-                <button id="mic-btn" onclick="toggleDictation()" class="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition">
-                    <i class="fa-solid fa-microphone text-2xl"></i>
-                </button>
-            </div>
-        </div>
     </div>
 
-        <!-- PATIENT VIEW -->
+    <!-- PATIENT VIEW -->
     <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 max-w-md mx-auto w-full shadow-2xl relative">
         <!-- Header -->
         <div class="bg-white p-4 shadow flex justify-between items-center">
@@ -259,7 +315,7 @@
                 </div>
             </div>
 
-                        <!-- SHARE TAB -->
+            <!-- SHARE TAB -->
             <div id="tab-content-share" class="hidden">
                 <h3 class="font-bold text-gray-700 mb-2 text-sm">Share with Family</h3>
                 <p class="text-xs text-gray-500 mb-4">Scan this QR code or share the link so other family members can see live updates.</p>
@@ -310,6 +366,110 @@
     <script>
         let selectedRole = null;
         let selectedBritishVoice = null;
+        let isManuallyOrdered = false;
+
+        // 12-Hour AM/PM Timestamp Generator
+        function get12HourTimestamp() {
+            const now = new Date();
+            let hours = now.getHours();
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            return `${hours}:${minutes} ${ampm}`;
+        }
+
+        // Toggle Slide-out Navigation Sidebar
+        function toggleSidebar() {
+            const panel = document.getElementById('side-panel');
+            const backdrop = document.getElementById('side-panel-backdrop');
+            
+            if (panel.classList.contains('-translate-x-full')) {
+                panel.classList.remove('-translate-x-full');
+                backdrop.classList.remove('hidden');
+                updateTriageHistoryView();
+            } else {
+                panel.classList.add('-translate-x-full');
+                backdrop.classList.add('hidden');
+            }
+        }
+
+        // Auto-Sorting Queue (Red -> Orange/Medium -> Blue/Low)
+        function sortQueueByPriority() {
+            if (isManuallyOrdered) return; // Keep manual nurse order if dragged
+            
+            const queueList = document.getElementById('patient-queue-list');
+            const cards = Array.from(queueList.querySelectorAll('.patient-card'));
+            
+            const priorityRank = { 
+                'CRITICAL': 1, 
+                'MEDIUM': 2, 
+                'MODERATE': 2, 
+                'ORANGE': 2, 
+                'LOW': 3 
+            };
+
+            cards.sort((a, b) => {
+                const prioA = (a.getAttribute('data-priority') || 'LOW').toUpperCase();
+                const prioB = (b.getAttribute('data-priority') || 'LOW').toUpperCase();
+                const rankA = priorityRank[prioA] || 3;
+                const rankB = priorityRank[prioB] || 3;
+                return rankA - rankB;
+            });
+
+            cards.forEach(card => queueList.appendChild(card));
+            updateTriageHistoryView();
+        }
+
+        function resetQueueSorting() {
+            isManuallyOrdered = false;
+            sortQueueByPriority();
+            updateTriageHistoryView();
+        }
+
+        // Populate Triage History Sidebar
+        function updateTriageHistoryView() {
+            const historyContainer = document.getElementById('sidebar-history-container');
+            const activeCards = document.querySelectorAll('#patient-queue-list .patient-card');
+            
+            if (activeCards.length === 0) {
+                historyContainer.innerHTML = `<div class="text-center text-gray-400 text-xs py-8">No triage history recorded yet.</div>`;
+                return;
+            }
+
+            let historyHtml = '';
+            activeCards.forEach(card => {
+                const name = card.getAttribute('data-name') || 'Patient';
+                const age = card.getAttribute('data-age') || '';
+                let priority = (card.getAttribute('data-priority') || 'LOW').toUpperCase();
+                if (priority === 'MODERATE' || priority === 'ORANGE') priority = 'MEDIUM';
+
+                const summary = card.getAttribute('data-summary') || '';
+                const vitals = card.getAttribute('data-vitals') || '';
+                const time = card.getAttribute('data-time') || get12HourTimestamp();
+
+                let badgeColor = "bg-blue-100 text-blue-700 border-blue-300";
+                if (priority === 'CRITICAL') badgeColor = "bg-red-100 text-red-700 border-red-300";
+                else if (priority === 'MEDIUM') badgeColor = "bg-orange-100 text-orange-700 border-orange-300";
+
+                historyHtml += `
+                    <div class="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition">
+                        <div class="flex justify-between items-start mb-1">
+                            <span class="font-bold text-xs text-gray-900">${name}${age ? ', ' + age : ''}</span>
+                            <span class="text-[10px] px-2 py-0.5 font-bold rounded-full border ${badgeColor}">${priority}</span>
+                        </div>
+                        <div class="text-xs font-medium text-gray-700 mb-1">${summary}</div>
+                        <div class="text-[11px] text-gray-500">${vitals}</div>
+                        <div class="text-[10px] text-gray-400 mt-2 flex items-center justify-between border-t pt-1">
+                            <span><i class="fa-regular fa-clock mr-1"></i>${time}</span>
+                            <span class="text-blue-600 font-semibold">Active in ER</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            historyContainer.innerHTML = historyHtml;
+        }
 
         // Dynamic British Female Voice Selector
         function loadVoices() {
@@ -346,8 +506,9 @@
             e.preventDefault();
             if (!selectedRole) return alert("Please select a role first!");
             document.getElementById('view-login').classList.add('hidden');
-                        if (selectedRole === 'staff') {
+            if (selectedRole === 'staff') {
                 document.getElementById('view-staff').classList.remove('hidden');
+                sortQueueByPriority();
             } else {
                 document.getElementById('view-patient').classList.remove('hidden');
                 initPatientView();
@@ -371,7 +532,10 @@
                 card.style.opacity = '0';
                 card.style.transform = 'translateX(-20px)';
                 card.style.transition = 'all 0.3s ease';
-                setTimeout(() => card.remove(), 300);
+                setTimeout(() => {
+                    card.remove();
+                    updateTriageHistoryView();
+                }, 300);
             }
         }
 
@@ -393,6 +557,8 @@
                 const card = e.target.closest('.patient-card');
                 if (card) card.classList.remove('opacity-40');
                 draggedCard = null;
+                isManuallyOrdered = true; // Flag manual nurse drag override
+                updateTriageHistoryView();
             });
 
             queueList.addEventListener('dragover', (e) => {
@@ -407,7 +573,10 @@
             });
         }
 
-        document.addEventListener('DOMContentLoaded', initQueueDragAndDrop);
+        document.addEventListener('DOMContentLoaded', () => {
+            initQueueDragAndDrop();
+            sortQueueByPriority();
+        });
 
         function wordToNum(text) {
             const wordMap = {
@@ -478,7 +647,7 @@
                 'tylenol', 'zofran', 'ativan', 'bleed', 'bleeding', 'fracture', 'trauma', 'mvc',
                 'allergy', 'anaphylaxis', 'peanuts', 'swelling', 'wheezing', 'gcs', 'lactate',
                 'dizzy', 'dizziness', 'fainting', 'syncope', 'seizure', 'nausea', 'vomiting', 'headache',
-                'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea'
+                'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea', 'moderate', 'orange', 'medium', 'urgent'
             ];
             
             let matchCount = 0;
@@ -563,17 +732,12 @@
                     const input = normalizedText.toLowerCase().trim();
                     if (!input) return;
 
-                    // Comprehensive list of cancellation triggers
                     const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear', 'start over'];
-                    
-                    // Comprehensive list of negative triggers (checked BEFORE affirmatives to catch "not correct", "that's wrong", etc.)
                     const negatives = [
                         'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct', 
                         'wrong', 'thats wrong', "that's wrong", 'that is wrong', 
                         'not right', 'false', 'redo', 'retry', 'scratch', 'mistake', 'error', 'naw'
                     ];
-                    
-                    // Comprehensive list of affirmative triggers
                     const affirmatives = [
                         'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive', 
                         'correct', 'thats correct', "that's correct", 'that is correct', 
@@ -648,7 +812,6 @@
 
             finalCleanText = normalizeTranscript(fullTranscriptStore).trim();
 
-            // Non-medical speech filter
             if (!finalCleanText || !isMedicalSpeech(finalCleanText)) {
                 document.getElementById('transcript-box').innerText = finalCleanText || "(No speech detected)";
                 document.getElementById('triage-status').className = "bg-amber-50 border border-amber-300 text-amber-700 rounded-lg p-3 mb-4 text-center font-bold text-sm";
@@ -724,7 +887,7 @@
             for (let pat of namePatterns) {
                 let match = text.match(pat);
                 if (match && match[1]) {
-                    let candidate = match[1].replace(/male|female|stemi|stroke|sepsis|trauma|ruptured|chest|pain|shortness|breath|heart|attack|sob/gi, '').trim();
+                    let candidate = match[1].replace(/male|female|stemi|stroke|sepsis|trauma|ruptured|chest|pain|shortness|breath|heart|attack|sob|moderate|orange|medium/gi, '').trim();
                     if (candidate.length > 3 && candidate.includes(' ')) {
                         name = candidate.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
                         break;
@@ -791,16 +954,20 @@
             let tags = [];
             let examSummary = [];
 
-            // Critical Symptom Recognition
-            const isCriticalCardiac = lower.includes('stemi') || lower.includes('chest pain') || lower.includes('heart attack') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa') || lower.includes('angina');
-            const isCriticalNeuro = lower.includes('stroke') || lower.includes('weakness') || lower.includes('facial droop') || lower.includes('aphasic') || lower.includes('unequal pupils') || gcs <= 13;
-            const isCriticalResp = o2Val < 90 || lower.includes('shortness of breath') || lower.includes('sob') || lower.includes('dyspnea') || lower.includes('difficulty breathing') || lower.includes("can't breathe") || lower.includes('tripoding') || lower.includes('2-word') || lower.includes('diminished') || lower.includes('silent') || (lower.includes('wheezing') && lower.includes('swelling'));
+            // Critical evaluation (Red)
+            const isCriticalCardiac = lower.includes('stemi') || lower.includes('severe chest pain') || lower.includes('heart attack') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa');
+            const isCriticalNeuro = lower.includes('stroke') || lower.includes('facial droop') || lower.includes('aphasic') || lower.includes('unequal pupils') || gcs <= 13;
+            const isCriticalResp = o2Val < 90 || lower.includes('severe shortness of breath') || lower.includes('respiratory failure') || lower.includes("can't breathe") || lower.includes('tripoding') || lower.includes('silent') || (lower.includes('wheezing') && lower.includes('swelling'));
             const isCriticalSepsis = lactate >= 4.0 || (sysBP < 90 && (lower.includes('fever') || lower.includes('chemo') || lower.includes('lethargic')));
-            const isCriticalTrauma = lower.includes('pelvic instability') || lower.includes('gross hematuria') || lower.includes('mvc') && gcs < 14;
-            const isCriticalAnaphylaxis = lower.includes('anaphylaxis') || lower.includes('ate peanuts') || (lower.includes('hives') && lower.includes('swelling') && sysBP < 90);
-
+            const isCriticalTrauma = lower.includes('pelvic instability') || lower.includes('gross hematuria') || (lower.includes('mvc') && gcs < 14);
+            const isCriticalAnaphylaxis = lower.includes('anaphylaxis') || (lower.includes('ate peanuts') && lower.includes('swelling')) || (lower.includes('hives') && lower.includes('swelling') && sysBP < 90);
             const isHypotensive = sysBP < 90;
+
+            // Moderate evaluation (Orange / Medium)
+            const isExplicitModerate = lower.includes('moderate') || lower.includes('orange') || lower.includes('medium') || lower.includes('urgent');
+            const isModerateClinical = lower.includes('abdominal') || lower.includes('fever') || lower.includes('vomiting') || lower.includes('emesis') || lower.includes('fracture') || lower.includes('laceration') || lower.includes('dehydration') || lower.includes('dizzy') || lower.includes('dizziness') || lower.includes('syncope') || lower.includes('chest pain') || lower.includes('shortness of breath') || lower.includes('sob');
             const isSevereHypertension = sysBP >= 180;
+            const isMediumPriority = isExplicitModerate || isModerateClinical || isSevereHypertension || lower.includes('ulcer') || lower.includes('necrotic') || lower.includes('abx') || (hrVal > 100 && hrVal <= 130) || (o2Val >= 90 && o2Val <= 94);
 
             if (isCriticalCardiac || isCriticalNeuro || isCriticalResp || isCriticalSepsis || isCriticalTrauma || isCriticalAnaphylaxis || isHypotensive) {
                 priority = 'Critical';
@@ -815,7 +982,7 @@
                 }
                 if (isCriticalResp) {
                     tags.push({ label: 'CRITICAL: RESPIRATORY FAILURE / AIRWAY RISK', color: 'bg-red-100 text-red-800 border-red-300' });
-                    examSummary.push('Severe Respiratory Distress / SOB');
+                    examSummary.push('Severe Respiratory Distress');
                 }
                 if (isCriticalSepsis) {
                     tags.push({ label: 'CRITICAL: SEPTIC SHOCK / HIGH LACTATE', color: 'bg-red-100 text-red-800 border-red-300' });
@@ -834,10 +1001,15 @@
                     examSummary.push('Severe Hypotension');
                 }
             } 
-            else if (isSevereHypertension || lower.includes('ulcer') || lower.includes('necrotic') || lower.includes('abx') || hrVal > 100 || o2Val <= 94) {
+            else if (isMediumPriority) {
                 priority = 'Medium';
-                tags.push({ label: 'MEDIUM RISK: URGENT MEDICAL EVALUATION', color: 'bg-orange-100 text-orange-800 border-orange-300' });
-                examSummary.push('Urgent Vitals / Infection');
+                tags.push({ label: 'MEDIUM / MODERATE RISK: URGENT MEDICAL EVALUATION', color: 'bg-orange-100 text-orange-800 border-orange-300' });
+                
+                if (lower.includes('moderate')) examSummary.push('Moderate Symptoms Detected');
+                else if (lower.includes('abdominal')) examSummary.push('Abdominal Pain / GI Concern');
+                else if (lower.includes('chest pain')) examSummary.push('Moderate Chest Discomfort');
+                else if (lower.includes('fracture')) examSummary.push('Possible Fracture / Trauma');
+                else examSummary.push('Urgent Vitals / Moderate Risk');
             } 
             else {
                 priority = 'Low';
@@ -872,10 +1044,17 @@
 
         function addPatientToQueue(name, age, summary, priority, vitals, meds) {
             const queueList = document.getElementById('patient-queue-list');
+            const timestamp = get12HourTimestamp();
             
+            let normPrio = priority.toUpperCase();
+            if (normPrio === 'MODERATE' || normPrio === 'ORANGE') normPrio = 'MEDIUM';
+
             let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
-            if (priority === 'Critical') colorBorder = "border-red-500 bg-red-50 text-red-600 bg-red-100";
-            else if (priority === 'Medium') colorBorder = "border-orange-500 bg-orange-50 text-orange-600 bg-orange-100";
+            if (normPrio === 'CRITICAL') {
+                colorBorder = "border-red-500 bg-red-50 text-red-600 bg-red-100";
+            } else if (normPrio === 'MEDIUM') {
+                colorBorder = "border-orange-500 bg-orange-50 text-orange-600 bg-orange-100";
+            }
 
             const ageLabel = age ? `, ${age}` : '';
             const medsLabel = (meds && meds !== 'None Noted') ? ` | Meds: ${meds}` : '';
@@ -883,19 +1062,32 @@
             const newCard = document.createElement('div');
             newCard.className = `patient-card border-l-4 ${colorBorder.split(' ')[0]} ${colorBorder.split(' ')[1]} p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
             newCard.setAttribute('draggable', 'true');
+            newCard.setAttribute('data-priority', normPrio);
+            newCard.setAttribute('data-name', name);
+            newCard.setAttribute('data-age', age);
+            newCard.setAttribute('data-summary', summary);
+            newCard.setAttribute('data-vitals', vitals);
+            newCard.setAttribute('data-meds', meds);
+            newCard.setAttribute('data-time', timestamp);
+
             newCard.innerHTML = `
                 <div class="flex justify-between font-bold items-center pr-6">
                     <span class="text-gray-900">${name}${ageLabel}</span> 
-                    <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} rounded-full uppercase">${priority}</span>
+                    <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} rounded-full uppercase">${normPrio}</span>
                 </div>
                 <div class="text-xs font-semibold text-gray-800 mt-1">${summary}</div>
                 <div class="text-xs text-gray-500 mt-1">${vitals}${medsLabel}</div>
+                <div class="text-[10px] text-gray-400 font-normal mt-1 flex items-center gap-1">
+                    <i class="fa-regular fa-clock"></i>${timestamp}
+                </div>
                 <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
                     <i class="fa-solid fa-xmark text-base"></i>
                 </button>
             `;
 
             queueList.prepend(newCard); 
+            sortQueueByPriority();
+            updateTriageHistoryView();
         }
 
         function resetTriage() {
@@ -916,8 +1108,8 @@
             document.getElementById('review-actions').classList.add('hidden');
             document.getElementById('detected-tags').classList.add('hidden');
         }
-                // PATIENT / FAMILY INTERFACE
 
+        // PATIENT / FAMILY INTERFACE
         let currentPatientTab = 'home';
 
         let primaryContact = {
@@ -1000,7 +1192,6 @@
             document.getElementById('primary-relation').innerText = primaryContact.relation;
             document.getElementById('primary-phone').innerText = primaryContact.phone;
 
-            // Pre-fill edit form
             document.getElementById('edit-contact-name').value = primaryContact.name;
             document.getElementById('edit-contact-relation').value = primaryContact.relation;
             document.getElementById('edit-contact-phone').value = primaryContact.phone;
@@ -1025,24 +1216,6 @@
         });
 
         function simulateSendSMS() {
-    const phone = primaryContact.phone;
-    const message =
-`The ER: Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
-
-This message contains a secure link to view live updates about their condition:
-https://the-er.app/family/abc123
-
-A unique QR code is also available inside the app for sharing with other family members.`;
-
-    alert(
-        'DEMO SMS PREVIEW\n\n' +
-        'To: ' + phone + '\n\n' +
-        message +
-        '\n\n(In a real deployment, this would be sent via an SMS gateway like Twilio.)'
-    );
-}
-
-        function simulateSendSMS() {
             const msg =
 `SMS to ${primaryContact.name} (${primaryContact.phone}):
 
@@ -1065,11 +1238,11 @@ A unique QR code is also available inside the app for sharing with other family 
             });
         }
 
-                let qrCodeObj = null;
+        let qrCodeObj = null;
 
         function generateQRCode() {
             const container = document.getElementById('qrcode-container');
-            container.innerHTML = ''; // clear old
+            container.innerHTML = '';
 
             const shareLink = 'https://the-er.app/family/abc123';
 
@@ -1097,7 +1270,7 @@ A unique QR code is also available inside the app for sharing with other family 
             link.click();
         }
 
-                function initPatientView() {
+        function initPatientView() {
             const patientName = 'James Henderson';
             document.getElementById('patient-display-name').innerText = patientName;
             document.getElementById('qr-patient-name').innerText = patientName;
@@ -1119,7 +1292,6 @@ A unique QR code is also available inside the app for sharing with other family 
             renderPrimaryContact();
             switchPatientTab('home');
 
-            // Generate QR code for Share tab
             generateQRCode();
         }
     </script>
