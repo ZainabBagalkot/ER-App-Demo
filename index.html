@@ -662,7 +662,6 @@
             return matchCount > 0;
         }
 
-        let recognition = null;
         let mode = 'idle';
         let fullTranscriptStore = '';
         let silenceTimer = null;
@@ -678,7 +677,7 @@
 
         function botSpeak(text, callback) {
             window.speechSynthesis.cancel();
-            if (recognition) { try { recognition.abort(); } catch(e){} }
+            stopListening();
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;
@@ -696,18 +695,71 @@
 
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
-        function initRecognition() {
-            if (!SpeechRecognition) return;
+        // ---- Speech recognition (browser Web Speech API, ~Chrome) ----
+        let nativeRecog = null;
 
-            recognition = new SpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'en-US';
+        // Shared handler: feed the transcript into the app flow.
+        function handleSpeechText(currentFinal, interimTranscript) {
+            if (currentFinal) fullTranscriptStore += currentFinal;
+            const rawSpoken = fullTranscriptStore + interimTranscript;
+            const normalizedText = normalizeTranscript(rawSpoken);
 
-            recognition.onresult = function(event) {
+            if (mode === 'dictating') {
+                document.getElementById('transcript-box').innerText = normalizedText;
+
+                clearTimeout(silenceTimer);
+                if (normalizedText.trim().length > 5) {
+                    silenceTimer = setTimeout(() => {
+                        stopDictationAndReview();
+                    }, 2500);
+                }
+            }
+            else if (mode === 'confirming') {
+                const input = normalizedText.toLowerCase().trim();
+                if (!input) return;
+
+                const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear', 'start over'];
+                const negatives = [
+                    'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct',
+                    'wrong', 'thats wrong', "that's wrong", 'that is wrong',
+                    'not right', 'false', 'redo', 'retry', 'scratch', 'mistake', 'error', 'naw'
+                ];
+                const affirmatives = [
+                    'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive',
+                    'correct', 'thats correct', "that's correct", 'that is correct',
+                    'right', 'thats right', "that's right", 'that is right',
+                    'sure', 'confirm', 'confirmed', 'save', 'sounds good', 'perfect',
+                    'exact', 'exactly', 'spot on', 'roger', 'copy', '10 4', '10-4'
+                ];
+
+                if (cancels.some(word => input.includes(word))) {
+                    stopListening();
+                    resetTriage();
+                }
+                else if (negatives.some(word => input.includes(word))) {
+                    stopListening();
+                    botSpeak("Take 2, listening.", function() {
+                        resetTriage();
+                        startDictation();
+                    });
+                }
+                else if (affirmatives.some(word => input.includes(word))) {
+                    stopListening();
+                    processConfirmationSuccess();
+                }
+            }
+        }
+
+        function initNativeRecognition() {
+            if (!SpeechRecognition) return false;
+            nativeRecog = new SpeechRecognition();
+            nativeRecog.continuous = true;
+            nativeRecog.interimResults = true;
+            nativeRecog.lang = 'en-US';
+
+            nativeRecog.onresult = function(event) {
                 let interimTranscript = '';
                 let currentFinal = '';
-
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
                     if (event.results[i].isFinal) {
                         currentFinal += event.results[i][0].transcript + ' ';
@@ -715,66 +767,27 @@
                         interimTranscript += event.results[i][0].transcript;
                     }
                 }
-
-                if (currentFinal) fullTranscriptStore += currentFinal;
-                const rawSpoken = fullTranscriptStore + interimTranscript;
-                const normalizedText = normalizeTranscript(rawSpoken);
-
-                if (mode === 'dictating') {
-                    document.getElementById('transcript-box').innerText = normalizedText;
-
-                    clearTimeout(silenceTimer);
-                    if (normalizedText.trim().length > 5) {
-                        silenceTimer = setTimeout(() => {
-                            stopDictationAndReview();
-                        }, 2500);
-                    }
-                }
-                else if (mode === 'confirming') {
-                    const input = normalizedText.toLowerCase().trim();
-                    if (!input) return;
-
-                    const cancels = ['cancel', 'scrap that', 'scrap', 'delete', 'reset', 'clear', 'start over'];
-                    const negatives = [
-                        'no', 'nope', 'nah', 'negative', 'incorrect', 'not correct',
-                        'wrong', 'thats wrong', "that's wrong", 'that is wrong',
-                        'not right', 'false', 'redo', 'retry', 'scratch', 'mistake', 'error', 'naw'
-                    ];
-                    const affirmatives = [
-                        'yes', 'yeah', 'yep', 'yup', 'yea', 'ya', 'affirmative', 'positive',
-                        'correct', 'thats correct', "that's correct", 'that is correct',
-                        'right', 'thats right', "that's right", 'that is right',
-                        'sure', 'confirm', 'confirmed', 'save', 'sounds good', 'perfect',
-                        'exact', 'exactly', 'spot on', 'roger', 'copy', '10 4', '10-4'
-                    ];
-
-                    if (cancels.some(word => input.includes(word))) {
-                        try { recognition.abort(); } catch(e){}
-                        resetTriage();
-                    }
-                    else if (negatives.some(word => input.includes(word))) {
-                        try { recognition.abort(); } catch(e){}
-                        botSpeak("Take 2, listening.", function() {
-                            resetTriage();
-                            startDictation();
-                        });
-                    }
-                    else if (affirmatives.some(word => input.includes(word))) {
-                        try { recognition.abort(); } catch(e){}
-                        processConfirmationSuccess();
-                    }
-                }
+                handleSpeechText(currentFinal, interimTranscript);
             };
 
-            recognition.onerror = function(e) { console.error("Speech Error:", e.error); };
-            recognition.onend = function() {
+            nativeRecog.onerror = function(e) { console.error("Speech Error:", e.error); };
+            nativeRecog.onend = function() {
                 if (mode === 'dictating' || mode === 'confirming') {
-                    try { recognition.start(); } catch(e){}
+                    try { nativeRecog.start(); } catch(e){}
                 }
             };
+            return true;
         }
 
-        initRecognition();
+        function startListening() {
+            if (!SpeechRecognition) return;
+            initNativeRecognition();
+            try { nativeRecog.start(); } catch(e){}
+        }
+
+        function stopListening() {
+            if (nativeRecog) { try { nativeRecog.abort(); } catch(e){} }
+        }
 
         function toggleDictation() {
             if (mode === 'idle') startDictation();
@@ -782,8 +795,6 @@
         }
 
         function startDictation() {
-            if (!recognition) initRecognition();
-
             mode = 'dictating';
             fullTranscriptStore = '';
             clearTimeout(silenceTimer);
@@ -800,13 +811,13 @@
             document.getElementById('detected-tags').classList.add('hidden');
             document.getElementById('review-actions').classList.add('hidden');
 
-            try { recognition.start(); } catch(e){}
+            startListening();
         }
 
         function stopDictationAndReview() {
             clearTimeout(silenceTimer);
             mode = 'review';
-            try { recognition.abort(); } catch(e){}
+            stopListening();
 
             const micBtn = document.getElementById('mic-btn');
             micBtn.className = "bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed";
@@ -848,7 +859,7 @@
                 mode = 'confirming';
                 fullTranscriptStore = '';
                 document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-ear-listen text-blue-600 mr-2 animate-bounce"></i>Listening...';
-                try { recognition.start(); } catch(e){}
+                startListening();
             });
         }
 
@@ -1040,7 +1051,7 @@
 
         function manualConfirm() {
             window.speechSynthesis.cancel();
-            try { recognition.abort(); } catch(e){}
+            stopListening();
             processConfirmationSuccess();
         }
 
@@ -1094,7 +1105,7 @@
 
         function resetTriage() {
             window.speechSynthesis.cancel();
-            try { recognition.abort(); } catch(e){}
+            stopListening();
             clearTimeout(silenceTimer);
             mode = 'idle';
             fullTranscriptStore = '';
