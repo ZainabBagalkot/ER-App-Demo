@@ -6,6 +6,9 @@
     <title>The ER - Voice Triage Engine</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- QRCode.js Library -->
@@ -24,40 +27,46 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 font-sans h-screen flex flex-col">
+<body class="bg-gray-100 dark:bg-gray-900 dark:text-gray-100 text-gray-800 font-sans h-screen flex flex-col">
+
+    <!-- THEME TOGGLE -->
+    <button onclick="toggleTheme()" id="theme-toggle" title="Toggle theme"
+        class="fixed top-4 right-4 z-[100] w-11 h-11 rounded-full flex items-center justify-center shadow-lg text-lg bg-white dark:bg-gray-700 border border-gray-200 dark:border-gray-600 text-gray-700 dark:text-gray-100 hover:scale-105 transition">
+        <i id="theme-toggle-icon" class="fa-solid fa-moon"></i>
+    </button>
 
     <!-- LOGIN VIEW -->
     <div id="view-login" class="flex-1 flex items-center justify-center p-4">
-        <div class="bg-white rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-md w-full p-8 text-center">
             <div class="flex justify-center mb-4 text-blue-600">
                 <i class="fa-solid fa-truck-medical text-5xl"></i>
             </div>
             <h1 class="text-3xl font-bold mb-2">The ER</h1>
-            <p class="text-gray-500 mb-8">Clinical Voice Triage Platform</p>
+            <p class="text-gray-500 mb-8">ER Status and Triage Assistant</p>
 
             <form id="login-form" class="space-y-6 text-left">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Sign in as:</label>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sign in as:</label>
                     <div class="grid grid-cols-2 gap-4">
-                        <button type="button" onclick="selectRole('staff')" id="role-staff" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
-                            <i class="fa-solid fa-user-nurse text-2xl text-blue-600 mb-2"></i>
+                        <button type="button" onclick="selectRole('staff')" id="role-staff" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
+                            <i id="role-icon-staff" class="fa-solid fa-user-nurse text-2xl text-blue-600 mb-2"></i>
                             <div class="font-semibold text-sm">Hospital Staff</div>
                         </button>
-                        <button type="button" onclick="selectRole('patient')" id="role-patient" class="role-btn border-2 border-gray-200 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
-                            <i class="fa-solid fa-users text-2xl text-green-600 mb-2"></i>
-                            <div class="font-semibold text-sm">Patient / Family</div>
+                        <button type="button" onclick="selectRole('patient')" id="role-patient" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
+                            <i id="role-icon-patient" class="fa-solid fa-users text-2xl text-green-600 mb-2"></i>
+                            <div class="font-semibold text-sm">User/Care Circle</div>
                         </button>
                     </div>
                 </div>
 
                 <div class="space-y-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Email / ID</label>
-                        <input type="text" id="login-id-val" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500" placeholder="Enter any text">
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Email / ID</label>
+                        <input type="text" id="login-id-val" class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500" placeholder="Enter any text">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700">Password</label>
-                        <input type="password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-blue-500" placeholder="Enter any text" required>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Password</label>
+                        <input type="password" class="mt-1 block w-full px-4 py-2 border border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100 rounded-md focus:ring-blue-500" placeholder="Enter any text" required>
                     </div>
                 </div>
 
@@ -72,7 +81,7 @@
     <div id="side-panel-backdrop" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity" onclick="toggleSidebar()"></div>
 
     <!-- STAFF SIDE PANEL: Triage History -->
-    <div id="side-panel-staff" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div id="side-panel-staff" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white dark:bg-gray-800 z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="bg-blue-600 text-white p-5 flex justify-between items-center shadow">
             <div class="flex items-center gap-3 font-bold text-lg">
                 <i class="fa-solid fa-truck-medical text-2xl"></i>
@@ -102,7 +111,7 @@
     </div>
 
     <!-- PATIENT/FAMILY SIDE PANEL: Account Profile -->
-    <div id="side-panel-patient" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
+    <div id="side-panel-patient" class="fixed top-0 left-0 h-full w-80 md:w-96 bg-white dark:bg-gray-800 z-50 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out flex flex-col">
         <div class="bg-blue-600 text-white p-6">
             <div class="flex justify-between items-start">
                 <div>
@@ -115,14 +124,14 @@
 
         <div class="flex-1 p-5 overflow-y-auto">
             <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">My Emergency Contact</h3>
-            <div class="bg-gray-50 rounded-xl p-4 border border-gray-100 mb-6">
-                <div class="text-sm font-bold text-gray-800" id="side-contact-name">Sarah Winsley</div>
+            <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-100 dark:border-gray-600 mb-6">
+                <div class="text-sm font-bold text-gray-800 dark:text-gray-100" id="side-contact-name">Sarah Winsley</div>
                 <div class="text-xs text-gray-500">Primary Emergency Contact</div>
                 <div class="text-xs text-blue-600 font-bold mt-2" id="side-contact-phone">+971 55 888 7777</div>
                 <button onclick="openEditContactModal()" class="mt-4 text-[10px] font-bold text-blue-600 uppercase border-b border-blue-600 pb-0.5">Edit My Contact</button>
             </div>
 
-            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">Patients Relying on Me</h3>
+            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">My Updates</h3>
             <div id="sidebar-patient-list" class="space-y-2">
                 <!-- Mini list of patients -->
             </div>
@@ -137,7 +146,7 @@
     <div id="view-staff" class="hidden flex-1 flex flex-col max-w-7xl mx-auto w-full p-4 gap-4">
 
         <!-- Top Control Bar with Clickable Blue Logo Button -->
-        <div class="w-full bg-white border border-gray-200 shadow-sm rounded-xl px-4 py-3 flex justify-between items-center">
+        <div class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl px-4 py-3 flex justify-between items-center">
             <button onclick="toggleSidebar()" class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-300 shadow">
                 <i class="fa-solid fa-truck-medical text-2xl text-blue-200"></i>
                 <span class="text-lg">The ER</span>
@@ -153,7 +162,7 @@
 
         <div class="flex-1 flex flex-col md:flex-row gap-6">
             <!-- Patient Queue -->
-            <div class="w-full md:w-1/3 bg-white rounded-xl shadow p-4 flex flex-col h-[82vh]">
+            <div class="w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col h-[82vh]">
                 <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
                     <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
                 </h2>
@@ -178,7 +187,7 @@
             </div>
 
             <!-- Voice Assistant -->
-            <div class="w-full md:w-2/3 bg-white rounded-xl shadow p-6 flex flex-col">
+            <div class="w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-xl shadow p-6 flex flex-col">
                 <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>ER Triage Assistant</h2>
                 <p class="text-gray-500 mb-4 text-xs">
                     Try these examples:
@@ -187,11 +196,11 @@
                     "Emma Jones 42 female moderate abdominal pain BP 130 over 85"
                 </p>
 
-                <div id="triage-status" class="bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 transition-all text-sm">
+                <div id="triage-status" class="bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 transition-all text-sm">
                     System Idle. Press the microphone button to start dictating.
                 </div>
 
-                <div class="flex-1 bg-gray-50 border-2 border-dashed border-gray-300 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
+                <div class="flex-1 bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
                     <span class="text-gray-400 italic">Live transcript will appear here...</span>
                 </div>
 
@@ -231,11 +240,11 @@
     </div>
 
     <!-- PATIENT/FAMILY VIEW -->
-    <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 max-w-md mx-auto w-full shadow-2xl relative overflow-hidden">
+    <div id="view-patient" class="hidden flex-1 flex flex-col bg-gray-100 dark:bg-gray-900 max-w-md mx-auto w-full shadow-2xl relative overflow-hidden">
 
         <!-- Top Bar -->
-        <div class="bg-white p-4 shadow-sm flex justify-between items-center">
-            <h1 class="text-xl font-black text-gray-800" id="user-top-name">Guest</h1>
+        <div class="bg-white dark:bg-gray-800 p-4 shadow-sm flex justify-between items-center">
+            <h1 class="text-xl font-black text-gray-800 dark:text-gray-100" id="user-top-name">Guest</h1>
             <button onclick="toggleSidebar()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
                 <i class="fa-solid fa-address-book text-lg"></i>
             </button>
@@ -247,7 +256,7 @@
             <div id="user-home-view" class="p-4 space-y-4">
                 <div>
                     <h3 class="font-bold text-gray-800 text-sm"> Patient Status </h3>
-                    <p class="text-xs text-gray-500">Live triage and status updates for your assigned contacts.</p>
+                    <p class="text-xs text-gray-500">Live status updates for your assigned contacts.</p>
                 </div>
                 <div id="patient-summary-list" class="space-y-4">
                     <!-- James Henderson card etc. -->
@@ -272,7 +281,7 @@
                 </div>
 
                 <!-- Tabs for Detail View -->
-                <div class="bg-white border-b flex">
+                <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 flex">
                     <button onclick="switchDetailTab('timeline')" id="dt-tab-timeline" class="detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600">TIMELINE</button>
                     <button onclick="switchDetailTab('updates')" id="dt-tab-updates" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">UPDATES</button>
                     <button onclick="switchDetailTab('share')" id="dt-tab-share" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">SHARE</button>
@@ -285,7 +294,7 @@
                     <div id="detail-content-updates" class="hidden space-y-3"></div>
                     <div id="detail-content-share" class="hidden flex flex-col items-center">
                         <p class="text-xs text-gray-500 mb-4 text-center">Share live tracking for <span class="active-p-name font-bold"></span> with other family members.</p>
-                        <div id="detail-qrcode" class="mb-4 bg-white p-2 rounded-lg border"></div>
+                        <div id="detail-qrcode" class="mb-4 bg-white dark:bg-gray-900 p-2 rounded-lg border"></div>
                         <button onclick="copyShareLink()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold">Copy Tracking Link</button>
                     </div>
                 </div>
@@ -296,8 +305,8 @@
 
     <!-- Edit Contact Modal (Patient/Family) -->
     <div id="edit-contact-modal" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center p-4">
-        <div class="bg-white rounded-xl shadow-xl w-full max-w-sm p-5">
-            <h3 class="font-bold text-gray-800 mb-4 text-sm uppercase">My Emergency Contact</h3>
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm p-5">
+            <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-4 text-sm uppercase">My Emergency Contact</h3>
             <form id="edit-contact-form" class="space-y-4">
                 <input type="text" id="edit-name" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Contact Name" required>
                 <input type="text" id="edit-relation" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Relationship" required>
@@ -318,10 +327,38 @@
         let selectedBritishVoice = null;
         let isManuallyOrdered = false;
 
+        // THEME TOGGLE (light / dark)
+        function applyTheme(theme) {
+            document.documentElement.classList.toggle('dark', theme === 'dark');
+            const icon = document.getElementById('theme-toggle-icon');
+            if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            try { localStorage.setItem('er-theme', theme); } catch(e){}
+        }
+
+        function toggleTheme() {
+            const isDark = document.documentElement.classList.contains('dark');
+            applyTheme(isDark ? 'light' : 'dark');
+        }
+
+        (function initTheme() {
+            let saved = null;
+            try { saved = localStorage.getItem('er-theme'); } catch(e){}
+            const prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            applyTheme(saved || (prefersDark ? 'dark' : 'light'));
+        })();
+
         function selectRole(role) {
             selectedRole = role;
-            document.querySelectorAll('.role-btn').forEach(btn => btn.classList.remove('border-blue-500', 'bg-blue-50'));
-            document.getElementById(`role-${role}`).classList.add('border-blue-500', 'bg-blue-50');
+            document.querySelectorAll('.role-btn').forEach(btn => {
+                btn.classList.remove('border-blue-500', 'bg-blue-50', 'dark:border-blue-500', 'dark:bg-blue-600');
+            });
+            document.getElementById('role-icon-staff').className = 'fa-solid fa-user-nurse text-2xl text-blue-600 dark:text-blue-300 mb-2';
+            document.getElementById('role-icon-patient').className = 'fa-solid fa-users text-2xl text-green-600 dark:text-green-300 mb-2';
+
+            const target = document.getElementById(`role-${role}`);
+            target.classList.add('border-blue-500', 'bg-blue-50', 'dark:border-blue-500', 'dark:bg-blue-600');
+            const icon = document.getElementById(`role-icon-${role}`);
+            icon.className = icon.className.includes('user-nurse') ? 'fa-solid fa-user-nurse text-2xl text-white mb-2' : 'fa-solid fa-users text-2xl text-white mb-2';
         }
 
         document.getElementById('login-form').addEventListener('submit', function(e) {
@@ -1199,7 +1236,7 @@
             if (tab === 'share') {
                 const qr = document.getElementById('detail-qrcode');
                 qr.innerHTML = "";
-                new QRCode(qr, { text: "https://the-er.app/v/" + activeIdx, width: 120, height: 120 });
+                new QRCode(qr, { text: "https://sensational-eclair-18fc33.netlify.app", width: 120, height: 120 });
             }
         }
 
@@ -1221,8 +1258,103 @@
             closeEditContactModal();
         });
 
+        function simulateSendSMS() {
+    const phone = primaryContact.phone;
+    const message =
+`The ER: Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
+
+This message contains a secure link to view live updates about their condition:
+https://sensational-eclair-18fc33.netlify.app
+
+A unique QR code is also available inside the app for sharing with other family members.`;
+
+    alert(
+        'DEMO SMS PREVIEW\n\n' +
+        'To: ' + phone + '\n\n' +
+        message +
+        '\n\n(In a real deployment, this would be sent via an SMS gateway like Twilio.)'
+    );
+}
+
+        function simulateSendSMS() {
+            const msg =
+`SMS to ${primaryContact.name} (${primaryContact.phone}):
+
+Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
+
+This message contains a secure link to view live updates about their condition.
+Link: https://sensational-eclair-18fc33.netlify.app
+
+A unique QR code is also available inside the app for sharing with other family members.`;
+
+            alert('TEST SMS SENT\n\n' + msg);
+        }
+
         function copyShareLink() {
-            alert("Secure Tracking Link Copied.");
+            const fakeLink = 'https://sensational-eclair-18fc33.netlify.app';
+            navigator.clipboard.writeText(fakeLink).then(() => {
+                alert('Share link copied! Send it to your family members.');
+            }).catch(() => {
+                alert('Link: ' + fakeLink);
+            });
+        }
+
+                let qrCodeObj = null;
+
+        function generateQRCode() {
+            const container = document.getElementById('qrcode-container');
+            container.innerHTML = ''; // clear old
+
+            const shareLink = 'https://sensational-eclair-18fc33.netlify.app';
+
+            qrCodeObj = new QRCode(container, {
+                text: shareLink,
+                width: 160,
+                height: 160,
+                colorDark: "#000000",
+                colorLight: "#ffffff",
+                correctLevel: QRCode.CorrectLevel.H
+            });
+        }
+
+        function downloadQRCode() {
+            const container = document.getElementById('qrcode-container');
+            const canvas = container.querySelector('canvas');
+            if (!canvas) {
+                alert('QR code not generated yet.');
+                return;
+            }
+
+            const link = document.createElement('a');
+            link.download = 'ER_Family_Share_QR.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+        }
+
+                function initPatientView() {
+            const patientName = 'James Henderson';
+            document.getElementById('patient-display-name').innerText = patientName;
+            document.getElementById('qr-patient-name').innerText = patientName;
+            document.getElementById('home-patient-name').innerText = patientName;
+
+            const banner = document.getElementById('patient-status-banner');
+            const title = document.getElementById('patient-status-title');
+            const subtitle = document.getElementById('patient-status-subtitle');
+
+            banner.className = 'bg-red-600 text-white p-4';
+            title.innerText = 'Critical Emergency';
+            subtitle.innerText = 'Cath Lab Activation Pending';
+
+            document.getElementById('home-status-title').innerText = 'Critical Emergency';
+            document.getElementById('home-status-subtitle').innerText = 'Cath Lab Activation Pending';
+
+            renderPatientTimeline();
+            renderUpdatesList();
+            renderPrimaryContact();
+            switchPatientTab('home');
+
+            // Generate QR code for Share tab
+            generateQRCode();
         }
     </script>
 </body>
