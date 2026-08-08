@@ -42,19 +42,19 @@
                 <i class="fa-solid fa-truck-medical text-5xl"></i>
             </div>
             <h1 class="text-3xl font-bold mb-2">The ER</h1>
-            <p class="text-gray-500 mb-8">ER Status and Triage Assistant</p>
+            <p class="text-gray-500 dark:text-gray-300 mb-8">ER Status and Triage Assistant</p>
 
             <form id="login-form" class="space-y-6 text-left">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sign in as:</label>
                     <div class="grid grid-cols-2 gap-4">
-                        <button type="button" onclick="selectRole('staff')" id="role-staff" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
-                            <i id="role-icon-staff" class="fa-solid fa-user-nurse text-2xl text-blue-600 mb-2"></i>
-                            <div class="font-semibold text-sm">Hospital Staff</div>
+                        <button type="button" onclick="selectRole('staff')" id="role-staff" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-gray-700 transition">
+                            <i id="role-icon-staff" class="fa-solid fa-user-nurse text-2xl text-blue-600 dark:text-blue-400 mb-2"></i>
+                            <div class="font-semibold text-sm text-gray-800 dark:text-gray-100">Hospital Staff</div>
                         </button>
-                        <button type="button" onclick="selectRole('patient')" id="role-patient" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 transition">
-                            <i id="role-icon-patient" class="fa-solid fa-users text-2xl text-green-600 mb-2"></i>
-                            <div class="font-semibold text-sm">User/Care Circle</div>
+                        <button type="button" onclick="selectRole('patient')" id="role-patient" class="role-btn border-2 border-gray-200 dark:border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 hover:bg-blue-50 dark:hover:bg-blue-700 transition">
+                            <i id="role-icon-patient" class="fa-solid fa-users text-2xl text-green-600 dark:text-green-400 mb-2"></i>
+                            <div class="font-semibold text-sm text-gray-800 dark:text-gray-100">User/Care Circle</div>
                         </button>
                     </div>
                 </div>
@@ -92,11 +92,11 @@
             </button>
         </div>
 
-        <div class="p-4 bg-gray-50 border-b flex justify-between items-center gap-2">
-            <span class="text-xs font-bold text-gray-700 uppercase tracking-wider">
-                <i class="fa-solid fa-clock-rotate-left mr-1 text-blue-600"></i> Triage History
+        <div class="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600 flex justify-between items-center gap-2">
+            <span class="text-xs font-bold text-gray-700 dark:text-gray-100 uppercase tracking-wider">
+                <i class="fa-solid fa-clock-rotate-left mr-1 text-blue-600 dark:text-blue-400"></i> Triage History
             </span>
-            <button onclick="resetQueueSorting()" class="text-xs bg-white border border-gray-300 text-gray-700 px-3 py-1 rounded hover:bg-gray-100 shadow-sm transition" title="Restore Priority Sorting Order">
+            <button onclick="resetQueueSorting()" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm transition" title="Restore Priority Sorting Order">
                 <i class="fa-solid fa-arrow-down-short-wide mr-1"></i> Auto-Sort
             </button>
         </div>
@@ -105,7 +105,7 @@
             <!-- Dynamic history cards inserted here -->
         </div>
 
-        <div class="p-3 border-t bg-gray-50 text-xs text-gray-400 text-center">
+        <div class="p-3 border-t bg-gray-50 dark:bg-gray-900 text-xs text-gray-400 dark:text-gray-400 text-center">
             The ER Clinical System v2.0
         </div>
     </div>
@@ -123,22 +123,22 @@
         </div>
 
         <div class="flex-1 p-5 overflow-y-auto">
-            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">My Emergency Contact</h3>
+            <h3 class="text-[10px] font-bold text-gray-400 dark:text-gray-300 uppercase tracking-widest mb-4">My Emergency Contact</h3>
             <div class="bg-gray-50 dark:bg-gray-700 rounded-xl p-4 border border-gray-100 dark:border-gray-600 mb-6">
                 <div class="text-sm font-bold text-gray-800 dark:text-gray-100" id="side-contact-name">Sarah Winsley</div>
-                <div class="text-xs text-gray-500">Primary Emergency Contact</div>
-                <div class="text-xs text-blue-600 font-bold mt-2" id="side-contact-phone">+971 55 888 7777</div>
-                <button onclick="openEditContactModal()" class="mt-4 text-[10px] font-bold text-blue-600 uppercase border-b border-blue-600 pb-0.5">Edit My Contact</button>
+                <div class="text-xs text-gray-500 dark:text-gray-300">Primary Emergency Contact</div>
+                <div class="text-xs text-blue-600 dark:text-blue-400 font-bold mt-2" id="side-contact-phone">+971 55 888 7777</div>
+                <button onclick="openEditContactModal()" class="mt-4 text-[10px] font-bold text-blue-600 dark:text-blue-400 uppercase border-b border-blue-600 dark:border-blue-400 pb-0.5">Edit My Contact</button>
             </div>
 
-            <h3 class="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-4">My Updates</h3>
+            <h3 class="text-[10px] font-bold text-gray-400 dark:text-gray-300 uppercase tracking-widest mb-4">My Updates</h3>
             <div id="sidebar-patient-list" class="space-y-2">
                 <!-- Mini list of patients -->
             </div>
         </div>
 
-        <div class="p-4 border-t bg-gray-50">
-            <button onclick="logout()" class="w-full py-2 bg-white text-red-500 border border-red-100 rounded-lg text-sm font-bold">Sign Out</button>
+        <div class="p-4 border-t bg-gray-50 dark:bg-gray-900">
+            <button onclick="logout()" class="w-full py-2 bg-white dark:bg-gray-700 text-red-500 dark:text-red-400 border border-red-100 dark:border-red-600 rounded-lg text-sm font-bold hover:bg-red-50 dark:hover:bg-gray-600">Sign Out</button>
         </div>
     </div>
 
@@ -153,8 +153,8 @@
                 <i class="fa-solid fa-bars text-sm ml-1 text-blue-200"></i>
             </button>
             <div class="flex items-center gap-3">
-                <span class="text-xs font-medium text-gray-500 hidden sm:inline"><i class="fa-solid fa-circle text-green-500 mr-1 text-[10px]"></i>Staff Active</span>
-                <button onclick="logout()" class="text-sm bg-gray-100 hover:bg-red-50 text-gray-600 hover:text-red-600 px-3 py-2 rounded-lg border transition">
+                <span class="text-xs font-medium text-gray-500 dark:text-gray-300 hidden sm:inline"><i class="fa-solid fa-circle text-green-500 mr-1 text-[10px]"></i>Staff Active</span>
+                <button onclick="logout()" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-100 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 transition">
                     <i class="fa-solid fa-sign-out-alt mr-1"></i>Sign Out
                 </button>
             </div>
@@ -166,20 +166,20 @@
                 <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
                     <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
                 </h2>
-                <p class="text-xs text-gray-400 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
+                <p class="text-xs text-gray-400 dark:text-gray-300 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
 
                 <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <div class="patient-card border-l-4 border-red-500 bg-red-50 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
+                    <div class="patient-card border-l-4 border-red-500 bg-red-50 dark:bg-red-950 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
                         <div class="flex justify-between font-bold items-center pr-6">
-                            <span>James Henderson, 62M</span>
-                            <span class="text-red-600 text-xs px-2 py-0.5 bg-red-100 rounded-full">CRITICAL</span>
+                            <span class="text-gray-900 dark:text-gray-100">James Henderson, 62M</span>
+                            <span class="text-red-600 dark:text-red-300 text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900 rounded-full">CRITICAL</span>
                         </div>
-                        <div class="text-xs font-semibold text-red-900 mt-1">Acute STEMI / Chest Pain</div>
-                        <div class="text-xs text-gray-600 mt-1">BP 90/60 | HR 110 | SpO2 94%</div>
-                        <div class="text-[10px] text-gray-400 font-normal mt-1 flex items-center gap-1">
+                        <div class="text-xs font-semibold text-red-900 dark:text-red-300 mt-1">Acute STEMI / Chest Pain</div>
+                        <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">BP 90/60 | HR 110 | SpO2 94%</div>
+                        <div class="text-[10px] text-gray-400 dark:text-gray-300 font-normal mt-1 flex items-center gap-1">
                             <i class="fa-regular fa-clock"></i>10:05 AM
                         </div>
-                        <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
+                        <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 p-1" title="Cancel Patient">
                             <i class="fa-solid fa-xmark text-base"></i>
                         </button>
                     </div>
@@ -189,7 +189,7 @@
             <!-- Voice Assistant -->
             <div class="w-full md:w-2/3 bg-white dark:bg-gray-800 rounded-xl shadow p-6 flex flex-col">
                 <h2 class="text-2xl font-bold mb-1"><i class="fa-solid fa-microchip text-blue-600 mr-2"></i>ER Triage Assistant</h2>
-                <p class="text-gray-500 mb-4 text-xs">
+                <p class="text-gray-500 dark:text-gray-300 mb-4 text-xs">
                     Try these examples:
                     "Mark Taylor 25 male minor sore throat routine checkup BP 120 over 80"
                     "John Doe 58 male severe chest pain BP 85 over 50 O2 88%"
@@ -201,21 +201,21 @@
                 </div>
 
                 <div class="flex-1 bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
-                    <span class="text-gray-400 italic">Live transcript will appear here...</span>
+<span class="text-gray-400 dark:text-gray-500 italic">Live transcript will appear here...</span>
                 </div>
 
                 <!-- Metadata Display -->
-                <div id="extracted-meta" class="hidden mb-3 p-4 bg-blue-50 border border-blue-200 rounded-lg grid grid-cols-2 gap-3 text-xs font-semibold text-blue-900">
-                    <div><i class="fa-solid fa-user mr-1 text-blue-600"></i> Name: <span id="meta-name" class="font-normal text-gray-800">--</span></div>
-                    <div><i class="fa-solid fa-cake-candles mr-1 text-blue-600"></i> Age/Gender: <span id="meta-age" class="font-normal text-gray-800">--</span></div>
-                    <div><i class="fa-solid fa-heart-pulse mr-1 text-blue-600"></i> Extracted Vitals: <span id="meta-vitals" class="font-normal text-gray-800">--</span></div>
-                    <div><i class="fa-solid fa-pills mr-1 text-blue-600"></i> Medications: <span id="meta-meds" class="font-normal text-gray-800">None Noted</span></div>
-                    <div class="col-span-2"><i class="fa-solid fa-stethoscope mr-1 text-blue-600"></i> Clinical Findings: <span id="meta-exam" class="font-normal text-gray-800">--</span></div>
+                <div id="extracted-meta" class="hidden mb-3 p-4 bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg grid grid-cols-2 gap-3 text-xs font-semibold text-blue-900 dark:text-blue-100">
+                    <div><i class="fa-solid fa-user mr-1 text-blue-600 dark:text-blue-400"></i> Name: <span id="meta-name" class="font-normal text-gray-800 dark:text-gray-100">--</span></div>
+                    <div><i class="fa-solid fa-cake-candles mr-1 text-blue-600 dark:text-blue-400"></i> Age/Gender: <span id="meta-age" class="font-normal text-gray-800 dark:text-gray-100">--</span></div>
+                    <div><i class="fa-solid fa-heart-pulse mr-1 text-blue-600 dark:text-blue-400"></i> Extracted Vitals: <span id="meta-vitals" class="font-normal text-gray-800 dark:text-gray-100">--</span></div>
+                    <div><i class="fa-solid fa-pills mr-1 text-blue-600 dark:text-blue-400"></i> Medications: <span id="meta-meds" class="font-normal text-gray-800 dark:text-gray-100">None Noted</span></div>
+                    <div class="col-span-2"><i class="fa-solid fa-stethoscope mr-1 text-blue-600 dark:text-blue-400"></i> Clinical Findings: <span id="meta-exam" class="font-normal text-gray-800 dark:text-gray-100">--</span></div>
                 </div>
 
                 <!-- Tags -->
                 <div id="detected-tags" class="hidden mb-4">
-                    <h3 class="font-bold text-gray-700 mb-2 text-xs uppercase tracking-wider">Clinical Triage Classification:</h3>
+                    <h3 class="font-bold text-gray-700 dark:text-gray-200 mb-2 text-xs uppercase tracking-wider">Clinical Triage Classification:</h3>
                     <div id="tags-container" class="flex flex-wrap gap-2"></div>
                 </div>
 
@@ -224,7 +224,7 @@
                     <button onclick="manualConfirm()" class="bg-green-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-green-700 text-sm">
                         <i class="fa-solid fa-check mr-2"></i> Confirm & Save
                     </button>
-                    <button onclick="resetTriage()" class="bg-red-100 text-red-600 px-6 py-2 rounded-lg font-bold hover:bg-red-200 text-sm">
+                    <button onclick="resetTriage()" class="bg-red-100 dark:bg-red-900/50 dark:text-red-300 text-red-600 px-6 py-2 rounded-lg font-bold hover:bg-red-200 dark:hover:bg-red-900/70 text-sm">
                         <i class="fa-solid fa-rotate-right mr-2"></i> Scratch / Reset
                     </button>
                 </div>
@@ -255,8 +255,8 @@
             <!-- HOME VIEW (LIST OF PATIENTS) -->
             <div id="user-home-view" class="p-4 space-y-4">
                 <div>
-                    <h3 class="font-bold text-gray-800 text-sm"> Patient Status </h3>
-                    <p class="text-xs text-gray-500">Live status updates for your assigned contacts.</p>
+                    <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm"> Patient Status </h3>
+                    <p class="text-xs text-gray-500 dark:text-gray-400">Live status updates for your assigned contacts.</p>
                 </div>
                 <div id="patient-summary-list" class="space-y-4">
                     <!-- James Henderson card etc. -->
@@ -265,7 +265,7 @@
 
             <!-- DETAIL VIEW (SHOWN WHEN PATIENT CLICKED) -->
             <div id="user-detail-view" class="hidden flex-1 flex flex-col">
-                <button onclick="closePatientDetail()" class="p-4 text-blue-600 text-xs font-bold flex items-center gap-2">
+                <button onclick="closePatientDetail()" class="p-4 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Back to Patient List
                 </button>
 
@@ -283,8 +283,8 @@
                 <!-- Tabs for Detail View -->
                 <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 flex">
                     <button onclick="switchDetailTab('timeline')" id="dt-tab-timeline" class="detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600">TIMELINE</button>
-                    <button onclick="switchDetailTab('updates')" id="dt-tab-updates" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">UPDATES</button>
-                    <button onclick="switchDetailTab('share')" id="dt-tab-share" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400">SHARE</button>
+                    <button onclick="switchDetailTab('updates')" id="dt-tab-updates" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-300">UPDATES</button>
+                    <button onclick="switchDetailTab('share')" id="dt-tab-share" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-300">SHARE</button>
                 </div>
 
                 <div class="p-4 flex-1 overflow-y-auto">
@@ -293,7 +293,7 @@
                     </div>
                     <div id="detail-content-updates" class="hidden space-y-3"></div>
                     <div id="detail-content-share" class="hidden flex flex-col items-center">
-                        <p class="text-xs text-gray-500 mb-4 text-center">Share live tracking for <span class="active-p-name font-bold"></span> with other family members.</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-300 mb-4 text-center">Share live tracking for <span class="active-p-name font-bold"></span> with other family members.</p>
                         <div id="detail-qrcode" class="mb-4 bg-white dark:bg-gray-900 p-2 rounded-lg border"></div>
                         <button onclick="copyShareLink()" class="w-full bg-blue-600 text-white py-3 rounded-lg text-sm font-bold">Copy Tracking Link</button>
                     </div>
@@ -308,11 +308,11 @@
         <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-sm p-5">
             <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-4 text-sm uppercase">My Emergency Contact</h3>
             <form id="edit-contact-form" class="space-y-4">
-                <input type="text" id="edit-name" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Contact Name" required>
-                <input type="text" id="edit-relation" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Relationship" required>
-                <input type="tel" id="edit-phone" class="w-full px-4 py-2 border rounded-lg text-sm" placeholder="Phone Number" required>
+                <input type="text" id="edit-name" class="w-full px-4 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="Contact Name" required>
+                <input type="text" id="edit-relation" class="w-full px-4 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="Relationship" required>
+                <input type="tel" id="edit-phone" class="w-full px-4 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="Phone Number" required>
                 <div class="flex gap-2 pt-2">
-                    <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-100 py-2 rounded-lg text-sm font-bold">Cancel</button>
+                    <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-100 dark:bg-gray-700 dark:text-gray-100 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
                     <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-bold">Save</button>
                 </div>
             </form>
@@ -464,7 +464,7 @@
             const activeCards = document.querySelectorAll('#patient-queue-list .patient-card');
 
             if (activeCards.length === 0) {
-                historyContainer.innerHTML = `<div class="text-center text-gray-400 text-xs py-8">No triage history recorded yet.</div>`;
+                historyContainer.innerHTML = `<div class="text-center text-gray-400 dark:text-gray-300 text-xs py-8">No triage history recorded yet.</div>`;
                 return;
             }
 
@@ -484,16 +484,16 @@
                 else if (priority === 'MEDIUM') badgeColor = "bg-orange-100 text-orange-700 border-orange-300";
 
                 historyHtml += `
-                    <div class="bg-white border rounded-lg p-3 shadow-sm hover:shadow-md transition">
+                    <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-1">
-                            <span class="font-bold text-xs text-gray-900">${name}${age ? ', ' + age : ''}</span>
+                            <span class="font-bold text-xs text-gray-900 dark:text-gray-100">${name}${age ? ', ' + age : ''}</span>
                             <span class="text-[10px] px-2 py-0.5 font-bold rounded-full border ${badgeColor}">${priority}</span>
                         </div>
-                        <div class="text-xs font-medium text-gray-700 mb-1">${summary}</div>
-                        <div class="text-[11px] text-gray-500">${vitals}</div>
-                        <div class="text-[10px] text-gray-400 mt-2 flex items-center justify-between border-t pt-1">
+                        <div class="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">${summary}</div>
+                        <div class="text-[11px] text-gray-500 dark:text-gray-300">${vitals}</div>
+                        <div class="text-[10px] text-gray-400 dark:text-gray-400 mt-2 flex items-center justify-between border-t dark:border-gray-600 pt-1">
                             <span><i class="fa-regular fa-clock mr-1"></i>${time}</span>
-                            <span class="text-blue-600 font-semibold">Active in ER</span>
+                            <span class="text-blue-600 dark:text-blue-400 font-semibold">Active in ER</span>
                         </div>
                     </div>
                 `;
@@ -693,10 +693,17 @@
             window.speechSynthesis.speak(utterance);
         }
 
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        // ---- Speech recognition: AssemblyAI Realtime Streaming (Universal-3-5 Pro) ----
 
-        // ---- Speech recognition (browser Web Speech API, ~Chrome) ----
-        let nativeRecog = null;
+        const AAI_TOKEN_ENDPOINT = '/.netlify/functions/aai-token';
+        const AAI_WS_BASE = 'wss://streaming.assemblyai.com/v3/ws?sample_rate=16000&speech_model=universal-3-5-pro&mode=balanced';
+
+        let aaiSocket = null;       // AssemblyAI v3 WebSocket
+        let micMediaStream = null;  // getUserMedia stream
+        let micAudioCtx = null;     // AudioContext for capture
+        let micSourceNode = null;   // MediaStreamAudioSourceNode
+        let micScriptNode = null;   // ScriptProcessorNode (downsample 16kHz)
+        let pcmSamples = [];       // 16000Hz Int16 samples before packing
 
         // Shared handler: feed the transcript into the app flow.
         function handleSpeechText(currentFinal, interimTranscript) {
@@ -750,43 +757,148 @@
             }
         }
 
-        function initNativeRecognition() {
-            if (!SpeechRecognition) return false;
-            nativeRecog = new SpeechRecognition();
-            nativeRecog.continuous = true;
-            nativeRecog.interimResults = true;
-            nativeRecog.lang = 'en-US';
+        // Fetch a fresh single-use AssemblyAI temp token from our serverless function.
+        async function fetchAaiToken() {
+            const res = await fetch(AAI_TOKEN_ENDPOINT);
+            if (!res.ok) throw new Error('Failed to mint AssemblyAI token: ' + res.status);
+            const data = await res.json();
+            if (!data.token) throw new Error(data.error || 'No token returned.');
+            return data.token;
+        }
 
-            nativeRecog.onresult = function(event) {
-                let interimTranscript = '';
-                let currentFinal = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        currentFinal += event.results[i][0].transcript + ' ';
+        // Open the v3 realtime WebSocket (16kHz mono PCM16).
+        async function connectAaiStream() {
+            const token = await fetchAaiToken();
+            const socket = new WebSocket(`${AAI_WS_BASE}&token=${token}`);
+            socket.binaryType = 'arraybuffer';
+            aaiSocket = socket;
+
+            socket.onopen = function() {
+                console.log('[AssemblyAI] Streaming connected');
+                startMicCapture();
+            };
+
+            socket.onmessage = function(event) {
+                let msg;
+                try {
+                    msg = JSON.parse(typeof event.data === 'string' ? event.data : new TextDecoder('utf-8').decode(event.data));
+                } catch (e) { return; }
+
+                if (msg.type === 'Turn') {
+                    const transcript = msg.transcript || '';
+                    if (msg.end_of_turn) {
+                        handleSpeechText(transcript + ' ', '');
                     } else {
-                        interimTranscript += event.results[i][0].transcript;
+                        handleSpeechText('', transcript);
                     }
+                } else if (msg.type === 'SpeechStarted') {
+                    // audio detected; partials will follow as Turn events
+                    console.log('[AAI] speech started');
                 }
-                handleSpeechText(currentFinal, interimTranscript);
             };
 
-            nativeRecog.onerror = function(e) { console.error("Speech Error:", e.error); };
-            nativeRecog.onend = function() {
-                if (mode === 'dictating' || mode === 'confirming') {
-                    try { nativeRecog.start(); } catch(e){}
-                }
+            socket.onerror = function(e) {
+                console.error('[AssemblyAI] socket error', e);
             };
-            return true;
+
+            socket.onclose = function(e) {
+                console.log('[AssemblyAI] socket closed', e.code);
+                aaiSocket = null;
+                teardownMic();
+            };
         }
 
         function startListening() {
-            if (!SpeechRecognition) return;
-            initNativeRecognition();
-            try { nativeRecog.start(); } catch(e){}
+            teardownMic();
+            connectAaiStream().catch(function(err) {
+                console.error('[AssemblyAI] connect failed', err);
+                showSttError('Speech service unavailable. Check ASSEMBLYAI_API_KEY on Netlify.');
+            });
+        }
+
+        function showSttError(message) {
+            clearTimeout(silenceTimer);
+            stopListening();
+            mode = 'idle';
+            document.getElementById('transcript-box').innerText = message;
+            document.getElementById('triage-status').className = "bg-red-50 border border-red-300 text-red-600 rounded-lg p-3 mb-4 text-center font-bold text-sm";
+            document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-circle-exclamation mr-2"></i>Speech service unavailable';
+            const micBtn = document.getElementById('mic-btn');
+            micBtn.className = "bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition";
+            micBtn.innerHTML = '<i class="fa-solid fa-microphone text-2xl"></i>';
         }
 
         function stopListening() {
-            if (nativeRecog) { try { nativeRecog.abort(); } catch(e){} }
+            if (aaiSocket) {
+                try {
+                    if (aaiSocket.readyState === WebSocket.OPEN) {
+                        aaiSocket.send(JSON.stringify({ type: 'Terminate' }));
+                    }
+                    aaiSocket.close();
+                } catch(e){}
+                aaiSocket = null;
+            }
+            teardownMic();
+        }
+
+        // ---- Browser microphone -> 16kHz mono PCM16 for AssemblyAI ----
+        async function startMicCapture() {
+            try {
+                micMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                micAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                micSourceNode = micAudioCtx.createMediaStreamSource(micMediaStream);
+                micScriptNode = micAudioCtx.createScriptProcessor(4096, 1, 1);
+
+                const ratio = micAudioCtx.sampleRate / 16000; // e.g. 3 for 48kHz, 2.756 for 44.1kHz
+                let decimatorAcc = 0; // running fractional input-position counter
+                pcmSamples = [];
+
+                micScriptNode.onaudioprocess = function(e) {
+                    const input = e.inputBuffer.getChannelData(0);
+                    // Zero the output buffer so the mic does not echo through speakers.
+                    e.outputBuffer.getChannelData(0).fill(0);
+
+                    for (let i = 0; i < input.length; i++) {
+                        decimatorAcc += 1;
+                        if (decimatorAcc >= ratio) {
+                            decimatorAcc -= ratio;
+                            const s = Math.max(-1, Math.min(1, input[i]));
+                            pcmSamples.push(s < 0 ? s * 0x8000 : s * 0x7FFF);
+                        }
+                    }
+
+                    // Send whenever we have ~100ms of 16kHz audio (1600 samples).
+                    if (pcmSamples.length >= 1600) {
+                        flushPcmFrame();
+                    }
+                };
+
+                micSourceNode.connect(micScriptNode);
+                micScriptNode.connect(micAudioCtx.destination);
+            } catch(err) {
+                console.error('[AAAI] microphone capture failed', err);
+            }
+        }
+
+        function flushPcmFrame() {
+            if (!aaiSocket || aaiSocket.readyState !== WebSocket.OPEN || pcmSamples.length === 0) {
+                pcmSamples = [];
+                return;
+            }
+            const frame = new Int16Array(pcmSamples);
+            aaiSocket.send(frame.buffer);
+            pcmSamples = [];
+        }
+
+        function teardownMic() {
+            if (micScriptNode) { try { micScriptNode.disconnect(); } catch(e){} micScriptNode = null; }
+            if (micSourceNode) { try { micSourceNode.disconnect(); } catch(e){} micSourceNode = null; }
+            if (micAudioCtx) { try { micAudioCtx.close(); } catch(e){} micAudioCtx = null; }
+            if (micMediaStream) {
+                try { micMediaStream.getTracks().forEach(function(t){ t.stop(); }); } catch(e){}
+                micMediaStream = null;
+            }
+            pcmSamples = [];
         }
 
         function toggleDictation() {
@@ -1062,18 +1174,21 @@
             let normPrio = priority.toUpperCase();
             if (normPrio === 'MODERATE' || normPrio === 'ORANGE') normPrio = 'MEDIUM';
 
-            let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
+let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
+            let colorBadgeDark = "dark:bg-blue-900 dark:text-blue-300";
             if (normPrio === 'CRITICAL') {
                 colorBorder = "border-red-500 bg-red-50 text-red-600 bg-red-100";
+                colorBadgeDark = "dark:bg-red-900 dark:text-red-300";
             } else if (normPrio === 'MEDIUM') {
                 colorBorder = "border-orange-500 bg-orange-50 text-orange-600 bg-orange-100";
+                colorBadgeDark = "dark:bg-orange-900 dark:text-orange-300";
             }
 
             const ageLabel = age ? `, ${age}` : '';
             const medsLabel = (meds && meds !== 'None Noted') ? ` | Meds: ${meds}` : '';
 
             const newCard = document.createElement('div');
-            newCard.className = `patient-card border-l-4 ${colorBorder.split(' ')[0]} ${colorBorder.split(' ')[1]} p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
+            newCard.className = `patient-card border-l-4 ${colorBorder.split(' ')[0]} ${colorBorder.split(' ')[1]} dark:bg-gray-800 p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
             newCard.setAttribute('draggable', 'true');
             newCard.setAttribute('data-priority', normPrio);
             newCard.setAttribute('data-name', name);
@@ -1085,15 +1200,15 @@
 
             newCard.innerHTML = `
                 <div class="flex justify-between font-bold items-center pr-6">
-                    <span class="text-gray-900">${name}${ageLabel}</span>
-                    <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} rounded-full uppercase">${normPrio}</span>
+                    <span class="text-gray-900 dark:text-gray-100">${name}${ageLabel}</span>
+                    <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} ${colorBadgeDark} rounded-full uppercase">${normPrio}</span>
                 </div>
-                <div class="text-xs font-semibold text-gray-800 mt-1">${summary}</div>
-                <div class="text-xs text-gray-500 mt-1">${vitals}${medsLabel}</div>
-                <div class="text-[10px] text-gray-400 font-normal mt-1 flex items-center gap-1">
+                <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 mt-1">${summary}</div>
+                <div class="text-xs text-gray-500 dark:text-gray-300 mt-1">${vitals}${medsLabel}</div>
+                <div class="text-[10px] text-gray-400 dark:text-gray-300 font-normal mt-1 flex items-center gap-1">
                     <i class="fa-regular fa-clock"></i>${timestamp}
                 </div>
-                <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 hover:text-red-600 p-1" title="Cancel Patient">
+                <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 p-1" title="Cancel Patient">
                     <i class="fa-solid fa-xmark text-base"></i>
                 </button>
             `;
@@ -1116,7 +1231,7 @@
 
             document.getElementById('triage-status').className = "bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 text-sm";
             document.getElementById('triage-status').innerText = 'System Idle. Press the microphone button to start dictating.';
-            document.getElementById('transcript-box').innerHTML = '<span class="text-gray-400 italic">Live transcript will appear here...</span>';
+            document.getElementById('transcript-box').innerHTML = '<span class="text-gray-400 dark:text-gray-500 italic">Live transcript will appear here...</span>';
             document.getElementById('extracted-meta').classList.add('hidden');
             document.getElementById('review-actions').classList.add('hidden');
             document.getElementById('detected-tags').classList.add('hidden');
@@ -1164,9 +1279,9 @@
         function renderSidebarList() {
             const list = document.getElementById('sidebar-patient-list');
             list.innerHTML = PATIENTS_MAPPING.map((p, i) => `
-                <div onclick="selectPatient(${i}); toggleSidebar();" class="p-3 bg-white border border-gray-100 rounded-lg text-xs cursor-pointer hover:bg-blue-50">
-                    <div class="font-bold">${p.name}</div>
-                    <div class="text-gray-400 font-bold uppercase text-[9px]">${p.status}</div>
+                <div onclick="selectPatient(${i}); toggleSidebar();" class="p-3 bg-white dark:bg-gray-700 border border-gray-100 dark:border-gray-600 rounded-lg text-xs cursor-pointer hover:bg-blue-50 dark:hover:bg-gray-600">
+                    <div class="font-bold text-gray-800 dark:text-gray-100">${p.name}</div>
+                    <div class="text-gray-400 dark:text-gray-300 font-bold uppercase text-[9px]">${p.status}</div>
                 </div>
             `).join('');
         }
@@ -1174,16 +1289,16 @@
         function renderHomeList() {
             const container = document.getElementById('patient-summary-list');
             container.innerHTML = PATIENTS_MAPPING.map((p, idx) => `
-                <div onclick="selectPatient(${idx})" class="bg-white border rounded-xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:border-blue-300">
+                <div onclick="selectPatient(${idx})" class="bg-white dark:bg-gray-800 border dark:border-gray-600 rounded-xl p-4 shadow-sm flex items-center gap-4 cursor-pointer hover:border-blue-300">
                     <div class="${p.priority === 'CRITICAL' ? 'text-red-600 bg-red-50' : 'text-blue-600 bg-blue-50'} w-12 h-12 rounded-full flex items-center justify-center text-xl">
                         <i class="fa-solid ${p.priority === 'CRITICAL' ? 'fa-heart-pulse' : 'fa-user-check'}"></i>
                     </div>
                     <div class="flex-1">
                         <div class="flex justify-between items-center">
-                            <span class="font-bold text-gray-800">${p.name}</span>
+                            <span class="font-bold text-gray-800 dark:text-gray-100">${p.name}</span>
                             <span class="text-[9px] font-bold ${p.priority === 'CRITICAL' ? 'text-red-600' : 'text-blue-600'} uppercase">${p.priority}</span>
                         </div>
-                        <div class="text-xs text-gray-500 mt-0.5">${p.status}</div>
+                        <div class="text-xs text-gray-500 dark:text-gray-300 mt-0.5">${p.status}</div>
                     </div>
                 </div>
             `).join('');
@@ -1214,16 +1329,16 @@
             document.getElementById('detail-timeline-list').innerHTML = p.timeline.map(ev => `
                 <div class="relative pl-6">
                     <div class="absolute -left-2 top-1 w-4 h-4 rounded-full ${ev.color} border-4 border-white"></div>
-                    <div class="text-xs font-bold text-gray-800">${ev.title}</div>
-                    <div class="text-[10px] text-gray-500">${ev.time}</div>
+                    <div class="text-xs font-bold text-gray-800 dark:text-gray-100">${ev.title}</div>
+                    <div class="text-[10px] text-gray-500 dark:text-gray-300">${ev.time}</div>
                 </div>
             `).join('');
 
             // Updates
             document.getElementById('detail-content-updates').innerHTML = p.updates.map(u => `
-                <div class="bg-white border rounded-lg p-3">
-                    <div class="flex justify-between font-bold text-[11px] mb-1"><span>${u.title}</span><span class="text-gray-400">${u.time}</span></div>
-                    <div class="text-xs text-gray-600">${u.text}</div>
+                <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3">
+                    <div class="flex justify-between font-bold text-[11px] mb-1"><span class="text-gray-800 dark:text-gray-100">${u.title}</span><span class="text-gray-400 dark:text-gray-300">${u.time}</span></div>
+                    <div class="text-xs text-gray-600 dark:text-gray-200">${u.text}</div>
                 </div>
             `).join('');
 
@@ -1236,7 +1351,7 @@
         }
 
         function switchDetailTab(tab) {
-            document.querySelectorAll('.detail-tab').forEach(t => t.className = "detail-tab flex-1 py-3 text-xs font-bold text-gray-400");
+            document.querySelectorAll('.detail-tab').forEach(t => t.className = "detail-tab flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-300");
             document.getElementById(`dt-tab-${tab}`).className = "detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600";
 
             document.getElementById('detail-content-timeline').classList.add('hidden');
