@@ -154,6 +154,9 @@
             </button>
             <div class="flex items-center gap-3">
                 <span class="text-xs font-medium text-gray-500 dark:text-gray-300 hidden sm:inline"><i class="fa-solid fa-circle text-green-500 mr-1 text-[10px]"></i>Staff Active</span>
+                <button onclick="toggleTheme()" title="Toggle theme" class="w-10 h-10 rounded-full flex items-center justify-center text-base bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 hover:scale-105 transition">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
                 <button onclick="logout()" class="text-sm bg-gray-100 dark:bg-gray-700 hover:bg-red-50 dark:hover:bg-gray-600 text-gray-600 dark:text-gray-100 hover:text-red-600 dark:hover:text-red-400 px-3 py-2 rounded-lg border border-gray-300 dark:border-gray-600 transition">
                     <i class="fa-solid fa-sign-out-alt mr-1"></i>Sign Out
                 </button>
@@ -245,9 +248,14 @@
         <!-- Top Bar -->
         <div class="bg-white dark:bg-gray-800 p-4 shadow-sm flex justify-between items-center">
             <h1 class="text-xl font-black text-gray-800 dark:text-gray-100" id="user-top-name">Guest</h1>
-            <button onclick="toggleSidebar()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
-                <i class="fa-solid fa-address-book text-lg"></i>
-            </button>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleTheme()" title="Toggle theme" class="w-10 h-10 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 rounded-full flex items-center justify-center hover:scale-105 transition">
+                    <i class="theme-icon fa-solid fa-moon"></i>
+                </button>
+                <button onclick="toggleSidebar()" class="w-10 h-10 bg-blue-50 text-blue-600 rounded-full flex items-center justify-center">
+                    <i class="fa-solid fa-address-book text-lg"></i>
+                </button>
+            </div>
         </div>
 
         <div id="user-content-area" class="flex-1 flex flex-col overflow-y-auto">
@@ -330,8 +338,11 @@
         // THEME TOGGLE (light / dark)
         function applyTheme(theme) {
             document.documentElement.classList.toggle('dark', theme === 'dark');
-            const icon = document.getElementById('theme-toggle-icon');
-            if (icon) icon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+            document.querySelectorAll('.theme-icon').forEach(function(icon) {
+                icon.className = 'theme-icon fa-solid ' + (theme === 'dark' ? 'fa-sun' : 'fa-moon');
+            });
+            const loginIcon = document.getElementById('theme-toggle-icon');
+            if (loginIcon) loginIcon.className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
             try { localStorage.setItem('er-theme', theme); } catch(e){}
         }
 
@@ -366,6 +377,7 @@
             if (!selectedRole) return alert("Please select a role first!");
 
             document.getElementById('view-login').classList.add('hidden');
+            document.getElementById('theme-toggle').classList.add('hidden');
 
             if (selectedRole === 'staff') {
                 document.getElementById('view-staff').classList.remove('hidden');
@@ -696,6 +708,7 @@
         // ---- Speech recognition: AssemblyAI Realtime Streaming (Universal-3-5 Pro) ----
 
         const AAI_TOKEN_ENDPOINT = '/.netlify/functions/aai-token';
+        const AAI_TOKEN_FALLBACK = 'https://sensational-eclair-18fc33.netlify.app/.netlify/functions/aai-token';
         const AAI_WS_BASE = 'wss://streaming.assemblyai.com/v3/ws?sample_rate=16000&speech_model=universal-3-5-pro&mode=balanced';
 
         let aaiSocket = null;       // AssemblyAI v3 WebSocket
@@ -759,7 +772,15 @@
 
         // Fetch a fresh single-use AssemblyAI temp token from our serverless function.
         async function fetchAaiToken() {
-            const res = await fetch(AAI_TOKEN_ENDPOINT);
+            let res;
+            try {
+                res = await fetch(AAI_TOKEN_ENDPOINT);
+            } catch (e) {
+                res = null;
+            }
+            if (!res || !res.ok) {
+                res = await fetch(AAI_TOKEN_FALLBACK);
+            }
             if (!res.ok) throw new Error('Failed to mint AssemblyAI token: ' + res.status);
             const data = await res.json();
             if (!data.token) throw new Error(data.error || 'No token returned.');
