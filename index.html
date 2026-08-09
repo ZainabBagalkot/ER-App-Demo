@@ -92,13 +92,24 @@
             </button>
         </div>
 
-        <div class="p-4 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600 flex justify-between items-center gap-2">
-            <span class="text-xs font-bold text-gray-700 dark:text-gray-100 uppercase tracking-wider">
-                <i class="fa-solid fa-clock-rotate-left mr-1 text-blue-600 dark:text-blue-400"></i> Triage History
-            </span>
-            <button onclick="resetQueueSorting()" class="text-xs bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 px-3 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm transition" title="Restore Priority Sorting Order">
-                <i class="fa-solid fa-arrow-down-short-wide mr-1"></i> Auto-Sort
-            </button>
+        <!-- Date Control Header -->
+        <div class="p-3 bg-gray-50 dark:bg-gray-700 border-b dark:border-gray-600 flex flex-col gap-2">
+            <div class="flex justify-between items-center">
+                <span class="text-xs font-bold text-gray-700 dark:text-gray-100 uppercase tracking-wider flex items-center gap-1">
+                    <i class="fa-solid fa-clock-rotate-left text-blue-600 dark:text-blue-400"></i>
+                    <span id="history-date-label">Today (Aug 9, 2026)</span>
+                </span>
+                <button onclick="resetQueueSorting()" id="auto-sort-btn" class="text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-100 px-2.5 py-1 rounded hover:bg-gray-100 dark:hover:bg-gray-600 shadow-sm transition" title="Restore Priority Sorting Order">
+                    <i class="fa-solid fa-arrow-down-short-wide mr-1"></i> Auto-Sort
+                </button>
+            </div>
+
+            <div class="flex items-center gap-2 pt-1">
+                <input type="date" id="history-date-picker" value="2026-08-09" onchange="changeHistoryDate(this.value)" class="text-xs border rounded px-2 py-1 bg-white dark:bg-gray-800 dark:text-gray-100 border-gray-300 dark:border-gray-600 flex-1">
+                <button id="go-today-btn" onclick="changeHistoryDate('2026-08-09')" class="hidden text-xs bg-blue-600 text-white px-2 py-1 rounded font-bold hover:bg-blue-700 transition">
+                    Today
+                </button>
+            </div>
         </div>
 
         <div class="flex-1 overflow-y-auto p-4 space-y-3" id="sidebar-history-container">
@@ -145,7 +156,7 @@
     <!-- STAFF VIEW -->
     <div id="view-staff" class="hidden flex-1 flex flex-col max-w-7xl mx-auto w-full p-4 gap-4">
 
-        <!-- Top Control Bar with Clickable Blue Logo Button -->
+        <!-- Top Control Bar -->
         <div class="w-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 shadow-sm rounded-xl px-4 py-3 flex justify-between items-center">
             <button onclick="toggleSidebar()" class="flex items-center gap-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-bold transition focus:outline-none focus:ring-2 focus:ring-blue-300 shadow">
                 <i class="fa-solid fa-truck-medical text-2xl text-blue-200"></i>
@@ -166,13 +177,13 @@
         <div class="flex-1 flex flex-col md:flex-row gap-6">
             <!-- Patient Queue -->
             <div class="w-full md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow p-4 flex flex-col h-[82vh]">
-                <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b pb-2">
+                <h2 class="text-xl font-bold mb-2 flex items-center justify-between border-b dark:border-gray-700 pb-2">
                     <span><i class="fa-solid fa-list-ul mr-2 text-blue-600"></i>Active ER Queue</span>
                 </h2>
                 <p class="text-xs text-gray-400 dark:text-gray-300 mb-3"><i class="fa-solid fa-hand-pointer mr-1"></i> Drag & drop cards to reorder priority</p>
 
                 <div id="patient-queue-list" class="flex-1 overflow-y-auto space-y-3 pr-1">
-                    <div class="patient-card border-l-4 border-red-500 bg-red-50 dark:bg-red-950 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
+                    <div class="patient-card border-l-4 border-red-500 bg-red-50 dark:bg-red-950/80 p-3 rounded shadow-sm relative group transition-all" draggable="true" data-priority="CRITICAL" data-name="James Henderson" data-age="62M" data-summary="Acute STEMI / Chest Pain" data-vitals="BP 90/60 | HR 110 | SpO2 94%" data-meds="None Noted" data-time="10:05 AM">
                         <div class="flex justify-between font-bold items-center pr-6">
                             <span class="text-gray-900 dark:text-gray-100">James Henderson, 62M</span>
                             <span class="text-red-600 dark:text-red-300 text-xs px-2 py-0.5 bg-red-100 dark:bg-red-900 rounded-full">CRITICAL</span>
@@ -204,7 +215,7 @@
                 </div>
 
                 <div class="flex-1 bg-gray-50 dark:bg-gray-900 border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-4 mb-4 min-h-[140px] max-h-[220px] text-base leading-relaxed shadow-inner overflow-y-auto" id="transcript-box">
-<span class="text-gray-400 dark:text-gray-500 italic">Live transcript will appear here...</span>
+                    <span class="text-gray-400 dark:text-gray-500 italic">Live transcript will appear here...</span>
                 </div>
 
                 <!-- Metadata Display -->
@@ -260,7 +271,7 @@
 
         <div id="user-content-area" class="flex-1 flex flex-col overflow-y-auto">
 
-            <!-- HOME VIEW (LIST OF PATIENTS) -->
+            <!-- HOME VIEW -->
             <div id="user-home-view" class="p-4 space-y-4">
                 <div>
                     <h3 class="font-bold text-gray-800 dark:text-gray-100 text-sm"> Patient Status </h3>
@@ -271,7 +282,7 @@
                 </div>
             </div>
 
-            <!-- DETAIL VIEW (SHOWN WHEN PATIENT CLICKED) -->
+            <!-- DETAIL VIEW -->
             <div id="user-detail-view" class="hidden flex-1 flex flex-col">
                 <button onclick="closePatientDetail()" class="p-4 text-blue-600 dark:text-blue-400 text-xs font-bold flex items-center gap-2">
                     <i class="fa-solid fa-arrow-left"></i> Back to Patient List
@@ -288,7 +299,7 @@
                     </div>
                 </div>
 
-                <!-- Tabs for Detail View -->
+                <!-- Tabs -->
                 <div class="bg-white dark:bg-gray-800 border-b dark:border-gray-700 flex">
                     <button onclick="switchDetailTab('timeline')" id="dt-tab-timeline" class="detail-tab flex-1 py-3 text-xs font-bold text-blue-600 border-b-2 border-blue-600">TIMELINE</button>
                     <button onclick="switchDetailTab('updates')" id="dt-tab-updates" class="detail-tab flex-1 py-3 text-xs font-bold text-gray-400 dark:text-gray-300">UPDATES</button>
@@ -334,6 +345,16 @@
         let selectedRole = null;
         let selectedBritishVoice = null;
         let isManuallyOrdered = false;
+        let selectedHistoryDate = '2026-08-09'; // Default today
+
+        // Default mock history for previous dates
+        const PRELOADED_PAST_HISTORY = {
+            '2026-08-08': [
+                { name: 'Sarah Jenkins', age: '54F', priority: 'CRITICAL', summary: 'Acute Appendicitis / RLQ Pain', vitals: 'BP 118/76 | HR 88 | SpO2 98%', time: '09:15 PM' },
+                { name: 'Robert Chen', age: '71M', priority: 'MEDIUM', summary: 'Chronic COPD Exacerbation', vitals: 'BP 135/85 | HR 92 | SpO2 91%', time: '04:30 PM' },
+                { name: 'Elena Rostova', age: '31F', priority: 'CRITICAL', summary: 'Anaphylactic Reaction (Peanuts)', vitals: 'BP 88/58 | HR 118 | SpO2 93%', time: '11:10 AM' }
+            ]
+        };
 
         // THEME TOGGLE (light / dark)
         function applyTheme(theme) {
@@ -383,7 +404,6 @@
                 document.getElementById('view-staff').classList.remove('hidden');
                 sortQueueByPriority();
             } else {
-                // Patient/Family: any name (or none) works — no specific name required.
                 const enteredName = document.getElementById('login-id-val').value.trim();
                 USER_DATA.name = enteredName || "Family Member";
                 document.getElementById('user-top-name').innerText = USER_DATA.name;
@@ -398,14 +418,13 @@
             location.reload();
         }
 
-        // Role-aware sidebar: staff sees triage history, patient/family sees account profile
+        // Role-aware sidebar
         function toggleSidebar() {
             const isStaff = selectedRole === 'staff';
             const panel = document.getElementById(isStaff ? 'side-panel-staff' : 'side-panel-patient');
             const otherPanel = document.getElementById(isStaff ? 'side-panel-patient' : 'side-panel-staff');
             const backdrop = document.getElementById('side-panel-backdrop');
 
-            // Always keep the non-active panel closed/off-screen
             otherPanel.classList.add('-translate-x-full');
 
             if (panel.classList.contains('-translate-x-full')) {
@@ -423,10 +442,9 @@
         }
 
         /* =========================================================
-           STAFF MODULE — Voice Triage Engine (unchanged from original)
+           STAFF MODULE — Voice Triage Engine
            ========================================================= */
 
-        // 12-Hour AM/PM Timestamp Generator
         function get12HourTimestamp() {
             const now = new Date();
             let hours = now.getHours();
@@ -437,9 +455,9 @@
             return `${hours}:${minutes} ${ampm}`;
         }
 
-        // Auto-Sorting Queue (Red -> Orange/Medium -> Blue/Low)
+        // Priority Queue Sorting
         function sortQueueByPriority() {
-            if (isManuallyOrdered) return; // Keep manual nurse order if dragged
+            if (isManuallyOrdered) return;
 
             const queueList = document.getElementById('patient-queue-list');
             const cards = Array.from(queueList.querySelectorAll('.patient-card'));
@@ -470,42 +488,82 @@
             updateTriageHistoryView();
         }
 
+        // Change History Date
+        function changeHistoryDate(dateStr) {
+            selectedHistoryDate = dateStr;
+            const picker = document.getElementById('history-date-picker');
+            if (picker) picker.value = dateStr;
+
+            const label = document.getElementById('history-date-label');
+            const goTodayBtn = document.getElementById('go-today-btn');
+            const autoSortBtn = document.getElementById('auto-sort-btn');
+
+            if (dateStr === '2026-08-09') {
+                if (label) label.innerText = 'Today (Aug 9, 2026)';
+                if (goTodayBtn) goTodayBtn.classList.add('hidden');
+                if (autoSortBtn) autoSortBtn.classList.remove('hidden');
+            } else {
+                const dateParts = dateStr.split('-');
+                const dateObj = new Date(dateParts[0], dateParts[1] - 1, dateParts[2]);
+                const dateFormatted = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                if (label) label.innerText = `${dateFormatted}`;
+                if (goTodayBtn) goTodayBtn.classList.remove('hidden');
+                if (autoSortBtn) autoSortBtn.classList.add('hidden');
+            }
+
+            updateTriageHistoryView();
+        }
+
         // Populate Triage History Sidebar
         function updateTriageHistoryView() {
             const historyContainer = document.getElementById('sidebar-history-container');
-            const activeCards = document.querySelectorAll('#patient-queue-list .patient-card');
+            if (!historyContainer) return;
 
-            if (activeCards.length === 0) {
-                historyContainer.innerHTML = `<div class="text-center text-gray-400 dark:text-gray-300 text-xs py-8">No triage history recorded yet.</div>`;
+            let cardsData = [];
+
+            if (selectedHistoryDate === '2026-08-09') {
+                const activeCards = document.querySelectorAll('#patient-queue-list .patient-card');
+                activeCards.forEach(card => {
+                    cardsData.push({
+                        name: card.getAttribute('data-name') || 'Patient',
+                        age: card.getAttribute('data-age') || '',
+                        priority: card.getAttribute('data-priority') || 'LOW',
+                        summary: card.getAttribute('data-summary') || '',
+                        vitals: card.getAttribute('data-vitals') || '',
+                        time: card.getAttribute('data-time') || get12HourTimestamp()
+                    });
+                });
+            } else if (PRELOADED_PAST_HISTORY[selectedHistoryDate]) {
+                cardsData = PRELOADED_PAST_HISTORY[selectedHistoryDate];
+            }
+
+            if (cardsData.length === 0) {
+                historyContainer.innerHTML = `<div class="text-center text-gray-400 dark:text-gray-300 text-xs py-8"><i class="fa-solid fa-folder-open text-2xl mb-2 block"></i>No triage history recorded for this date.</div>`;
                 return;
             }
 
             let historyHtml = '';
-            activeCards.forEach(card => {
-                const name = card.getAttribute('data-name') || 'Patient';
-                const age = card.getAttribute('data-age') || '';
-                let priority = (card.getAttribute('data-priority') || 'LOW').toUpperCase();
+            cardsData.forEach(item => {
+                let priority = (item.priority || 'LOW').toUpperCase();
                 if (priority === 'MODERATE' || priority === 'ORANGE') priority = 'MEDIUM';
 
-                const summary = card.getAttribute('data-summary') || '';
-                const vitals = card.getAttribute('data-vitals') || '';
-                const time = card.getAttribute('data-time') || get12HourTimestamp();
+                let badgeColor = "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 border-blue-300";
+                if (priority === 'CRITICAL') badgeColor = "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300 border-red-300";
+                else if (priority === 'MEDIUM') badgeColor = "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300 border-amber-300";
 
-                let badgeColor = "bg-blue-100 text-blue-700 border-blue-300";
-                if (priority === 'CRITICAL') badgeColor = "bg-red-100 text-red-700 border-red-300";
-                else if (priority === 'MEDIUM') badgeColor = "bg-orange-100 text-orange-700 border-orange-300";
+                const statusText = (selectedHistoryDate === '2026-08-09') ? 'Active in ER' : 'Discharged / Handed Off';
 
                 historyHtml += `
                     <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3 shadow-sm hover:shadow-md transition">
                         <div class="flex justify-between items-start mb-1">
-                            <span class="font-bold text-xs text-gray-900 dark:text-gray-100">${name}${age ? ', ' + age : ''}</span>
+                            <span class="font-bold text-xs text-gray-900 dark:text-gray-100">${item.name}${item.age ? ', ' + item.age : ''}</span>
                             <span class="text-[10px] px-2 py-0.5 font-bold rounded-full border ${badgeColor}">${priority}</span>
                         </div>
-                        <div class="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">${summary}</div>
-                        <div class="text-[11px] text-gray-500 dark:text-gray-300">${vitals}</div>
+                        <div class="text-xs font-medium text-gray-700 dark:text-gray-200 mb-1">${item.summary}</div>
+                        <div class="text-[11px] text-gray-500 dark:text-gray-300">${item.vitals}</div>
                         <div class="text-[10px] text-gray-400 dark:text-gray-400 mt-2 flex items-center justify-between border-t dark:border-gray-600 pt-1">
-                            <span><i class="fa-regular fa-clock mr-1"></i>${time}</span>
-                            <span class="text-blue-600 dark:text-blue-400 font-semibold">Active in ER</span>
+                            <span><i class="fa-regular fa-clock mr-1"></i>${item.time}</span>
+                            <span class="${selectedHistoryDate === '2026-08-09' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-400 dark:text-gray-400'} font-semibold">${statusText}</span>
                         </div>
                     </div>
                 `;
@@ -514,7 +572,7 @@
             historyContainer.innerHTML = historyHtml;
         }
 
-        // Dynamic British Female Voice Selector
+        // British Female Voice Selector
         function loadVoices() {
             if (!('speechSynthesis' in window)) return;
             const voices = window.speechSynthesis.getVoices();
@@ -539,7 +597,6 @@
             loadVoices();
         }
 
-        // Cancel / Remove Patient
         function removePatient(btn) {
             const card = btn.closest('.patient-card');
             if (card) {
@@ -553,7 +610,6 @@
             }
         }
 
-        // Drag & Drop Reordering for Queue
         function initQueueDragAndDrop() {
             const queueList = document.getElementById('patient-queue-list');
             let draggedCard = null;
@@ -571,7 +627,7 @@
                 const card = e.target.closest('.patient-card');
                 if (card) card.classList.remove('opacity-40');
                 draggedCard = null;
-                isManuallyOrdered = true; // Flag manual nurse drag override
+                isManuallyOrdered = true;
                 updateTriageHistoryView();
             });
 
@@ -650,26 +706,35 @@
             return text;
         }
 
-        // Check if spoken speech contains medical relevance
+        // Check medical speech relevance strictly with word boundaries
         function isMedicalSpeech(text) {
-            const lower = text.toLowerCase();
+            if (!text || text.trim().length < 3) return false;
+            const lower = text.toLowerCase().trim();
+
+            const casualGreetings = ['whats up', "what's up", 'yoo', 'hello', 'hi there', 'how are you', 'testing'];
+            if (casualGreetings.some(g => lower === g || lower.startsWith(g + ' ') || lower.endsWith(' ' + g))) {
+                // Return false unless explicit clinical terms are also present
+            }
+
             const medicalTerms = [
                 'pain', 'chest', 'breath', 'shortness', 'heart', 'attack', 'stemi', 'stroke', 'sepsis',
                 'bp', 'blood pressure', 'hr', 'heart rate', 'spo2', 'o2', 'oxygen', 'sat', 'temp', 'fever',
-                'male', 'female', 'yo', 'year', 'old', 'patient', 'aspirin', 'epinephrine', 'nitro',
+                'male', 'female', 'year old', 'years old', 'patient', 'aspirin', 'epinephrine', 'nitro',
                 'nitroglycerin', 'albuterol', 'naloxone', 'morphine', 'fentanyl', 'heparin', 'plavix',
                 'tylenol', 'zofran', 'ativan', 'bleed', 'bleeding', 'fracture', 'trauma', 'mvc',
                 'allergy', 'anaphylaxis', 'peanuts', 'swelling', 'wheezing', 'gcs', 'lactate',
                 'dizzy', 'dizziness', 'fainting', 'syncope', 'seizure', 'nausea', 'vomiting', 'headache',
-                'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea', 'moderate', 'orange', 'medium', 'urgent'
+                'abdominal', 'stomach', 'ulcer', 'abx', 'antibiotic', 'sob', 'dyspnea', 'moderate', 'orange', 'medium', 'urgent', 'routine', 'sore throat'
             ];
 
             let matchCount = 0;
-            medicalTerms.forEach(term => {
-                if (lower.includes(term)) matchCount++;
-            });
+            for (let term of medicalTerms) {
+                const reg = new RegExp(`\\b${term}\\b`, 'i');
+                if (reg.test(lower)) matchCount++;
+            }
 
-            if (/\d+/.test(lower)) matchCount++;
+            if (/\b\d{1,3}\/\d{1,3}\b/.test(lower)) matchCount += 2;
+            if (/\b\d{1,3}\s*(?:male|female|yo|m|f)\b/i.test(lower)) matchCount += 1;
 
             return matchCount > 0;
         }
@@ -677,6 +742,7 @@
         let mode = 'idle';
         let fullTranscriptStore = '';
         let silenceTimer = null;
+        let isBotSpeaking = false;
 
         let extractedName = 'Unknown Patient';
         let extractedAge = '';
@@ -689,7 +755,7 @@
 
         function botSpeak(text, callback) {
             window.speechSynthesis.cancel();
-            stopListening();
+            isBotSpeaking = true;
 
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.rate = 0.95;
@@ -699,27 +765,33 @@
             }
 
             utterance.onend = function() {
-                if (callback) setTimeout(callback, 200);
+                isBotSpeaking = false;
+                if (callback) setTimeout(callback, 50);
+            };
+
+            utterance.onerror = function() {
+                isBotSpeaking = false;
+                if (callback) setTimeout(callback, 50);
             };
 
             window.speechSynthesis.speak(utterance);
         }
 
-        // ---- Speech recognition: AssemblyAI Realtime Streaming (Universal-3-5 Pro) ----
-
+        // AssemblyAI Streaming Implementation
         const AAI_TOKEN_ENDPOINT = '/.netlify/functions/aai-token';
         const AAI_TOKEN_FALLBACK = 'https://sensational-eclair-18fc33.netlify.app/.netlify/functions/aai-token';
         const AAI_WS_BASE = 'wss://streaming.assemblyai.com/v3/ws?sample_rate=16000&speech_model=universal-3-5-pro&mode=balanced';
 
-        let aaiSocket = null;       // AssemblyAI v3 WebSocket
-        let micMediaStream = null;  // getUserMedia stream
-        let micAudioCtx = null;     // AudioContext for capture
-        let micSourceNode = null;   // MediaStreamAudioSourceNode
-        let micScriptNode = null;   // ScriptProcessorNode (downsample 16kHz)
-        let pcmSamples = [];       // 16000Hz Int16 samples before packing
+        let aaiSocket = null;
+        let micMediaStream = null;
+        let micAudioCtx = null;
+        let micSourceNode = null;
+        let micScriptNode = null;
+        let pcmSamples = [];
 
-        // Shared handler: feed the transcript into the app flow.
         function handleSpeechText(currentFinal, interimTranscript) {
+            if (isBotSpeaking) return;
+
             if (currentFinal) fullTranscriptStore += currentFinal;
             const rawSpoken = fullTranscriptStore + interimTranscript;
             const normalizedText = normalizeTranscript(rawSpoken);
@@ -770,7 +842,6 @@
             }
         }
 
-        // Fetch a fresh single-use AssemblyAI temp token from our serverless function.
         async function fetchAaiToken() {
             let res;
             try {
@@ -787,8 +858,9 @@
             return data.token;
         }
 
-        // Open the v3 realtime WebSocket (16kHz mono PCM16).
         async function connectAaiStream() {
+            if (aaiSocket && aaiSocket.readyState === WebSocket.OPEN) return;
+
             const token = await fetchAaiToken();
             const socket = new WebSocket(`${AAI_WS_BASE}&token=${token}`);
             socket.binaryType = 'arraybuffer';
@@ -812,9 +884,6 @@
                     } else {
                         handleSpeechText('', transcript);
                     }
-                } else if (msg.type === 'SpeechStarted') {
-                    // audio detected; partials will follow as Turn events
-                    console.log('[AAI] speech started');
                 }
             };
 
@@ -823,14 +892,12 @@
             };
 
             socket.onclose = function(e) {
-                console.log('[AssemblyAI] socket closed', e.code);
                 aaiSocket = null;
                 teardownMic();
             };
         }
 
         function startListening() {
-            teardownMic();
             connectAaiStream().catch(function(err) {
                 console.error('[AssemblyAI] connect failed', err);
                 showSttError('Speech service unavailable. Check ASSEMBLYAI_API_KEY on Netlify.');
@@ -862,21 +929,20 @@
             teardownMic();
         }
 
-        // ---- Browser microphone -> 16kHz mono PCM16 for AssemblyAI ----
         async function startMicCapture() {
+            if (micMediaStream) return;
             try {
                 micMediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
                 micAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
                 micSourceNode = micAudioCtx.createMediaStreamSource(micMediaStream);
                 micScriptNode = micAudioCtx.createScriptProcessor(4096, 1, 1);
 
-                const ratio = micAudioCtx.sampleRate / 16000; // e.g. 3 for 48kHz, 2.756 for 44.1kHz
-                let decimatorAcc = 0; // running fractional input-position counter
+                const ratio = micAudioCtx.sampleRate / 16000;
+                let decimatorAcc = 0;
                 pcmSamples = [];
 
                 micScriptNode.onaudioprocess = function(e) {
                     const input = e.inputBuffer.getChannelData(0);
-                    // Zero the output buffer so the mic does not echo through speakers.
                     e.outputBuffer.getChannelData(0).fill(0);
 
                     for (let i = 0; i < input.length; i++) {
@@ -888,7 +954,6 @@
                         }
                     }
 
-                    // Send whenever we have ~100ms of 16kHz audio (1600 samples).
                     if (pcmSamples.length >= 1600) {
                         flushPcmFrame();
                     }
@@ -897,7 +962,7 @@
                 micSourceNode.connect(micScriptNode);
                 micScriptNode.connect(micAudioCtx.destination);
             } catch(err) {
-                console.error('[AAAI] microphone capture failed', err);
+                console.error('[AssemblyAI] microphone capture failed', err);
             }
         }
 
@@ -950,7 +1015,6 @@
         function stopDictationAndReview() {
             clearTimeout(silenceTimer);
             mode = 'review';
-            stopListening();
 
             const micBtn = document.getElementById('mic-btn');
             micBtn.className = "bg-gray-400 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg cursor-not-allowed";
@@ -959,6 +1023,7 @@
             finalCleanText = normalizeTranscript(fullTranscriptStore).trim();
 
             if (!finalCleanText || !isMedicalSpeech(finalCleanText)) {
+                stopListening();
                 document.getElementById('transcript-box').innerText = finalCleanText || "(No speech detected)";
                 document.getElementById('triage-status').className = "bg-amber-50 border border-amber-300 text-amber-700 rounded-lg p-3 mb-4 text-center font-bold text-sm";
                 document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-2"></i>Non-clinical speech detected.';
@@ -988,17 +1053,20 @@
 
             const simpleReadBack = `Did you say: ${finalCleanText}?`;
 
+            startListening();
+
             botSpeak(simpleReadBack, function() {
                 mode = 'confirming';
                 fullTranscriptStore = '';
                 document.getElementById('triage-status').innerHTML = '<i class="fa-solid fa-ear-listen text-blue-600 mr-2 animate-bounce"></i>Listening...';
-                startListening();
             });
         }
 
+        /* REFACTORED CLINICAL PARSER (NAME EXTRACTION ENGINE FIXED) */
         function parseUniversalClinicalText(text) {
             const lower = text.toLowerCase();
 
+            // 1. EXTRACT AGE & GENDER FIRST
             let age = "";
             let gender = "";
 
@@ -1024,24 +1092,59 @@
             }
             extractedAge = (age && gender) ? `${age}${gender}` : (age ? `${age}yo` : '');
 
+            // 2. REFACTORED INTELLIGENT NAME EXTRACTION ENGINE
             let name = "";
-            const namePatterns = [
-                /(?:stemi|stroke|sepsis|respiratory failure|trauma|anaphylaxis|aaa|patient|is)\s*:?\s*([a-z'\-]+(?:\s+[a-z'\-]+){1,2})/i,
-                /^([a-z'\-]+\s+[a-z'\-]+)(?:,|\s+\d|\s+[mf])/i
-            ];
 
-            for (let pat of namePatterns) {
-                let match = text.match(pat);
-                if (match && match[1]) {
-                    let candidate = match[1].replace(/male|female|stemi|stroke|sepsis|trauma|ruptured|chest|pain|shortness|breath|heart|attack|sob|moderate|orange|medium/gi, '').trim();
-                    if (candidate.length > 3 && candidate.includes(' ')) {
-                        name = candidate.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
-                        break;
-                    }
+            // Comprehensive set of non-name medical/filler stop words
+            const stopWords = new Set([
+                "new", "patient", "patients", "name", "named", "called", "is", "was", "uhh", "uh", "okay", "ok", "um", 
+                "so", "yeah", "a", "an", "the", "this", "we", "have", "has", "had", "male", "female", "boy", "girl",
+                "man", "woman", "yo", "year", "years", "old", "bp", "hr", "spo2", "o2", "blood", "pressure", "heart",
+                "rate", "chest", "pain", "shortness", "breath", "sob", "fever", "severe", "moderate", "routine",
+                "checkup", "stemi", "stroke", "sepsis", "trauma", "over", "by", "with", "having", "suffering",
+                "from", "presenting", "presents", "complaining", "complaint", "ingestion", "allergy", "acute",
+                "critical", "low", "medium", "orange", "red", "green", "blue", "unspecified", "unknown", "coming",
+                "in", "arrived", "arriving", "brought", "ems", "ambulance", "experiencing"
+            ]);
+
+            const cleanCandidate = (str) => {
+                if (!str) return "";
+                let words = str.trim().split(/\s+/).map(w => w.replace(/[^a-z'\-]/gi, '').toLowerCase());
+                let validWords = words.filter(w => w.length > 1 && !stopWords.has(w));
+                if (validWords.length >= 2) {
+                    return validWords.slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+                }
+                return "";
+            };
+
+            // Tier A: Direct "name" indicators anywhere in sentence
+            const explicitNameMatch = text.match(/(?:name\s+is|named|called|patient's\s+name\s+is|patient\s+name\s+is)\s+([a-z'\-]+\s+[a-z'\-]+)/i);
+            if (explicitNameMatch && explicitNameMatch[1]) {
+                name = cleanCandidate(explicitNameMatch[1]);
+            }
+
+            // Tier B: Phrase following "new patient [Name]" or "patient [Name]"
+            if (!name) {
+                const patientPhraseMatch = text.match(/(?:new\s+patient|patient)\s+(?:is\s+)?([a-z'\-]+\s+[a-z'\-]+)/i);
+                if (patientPhraseMatch && patientPhraseMatch[1]) {
+                    name = cleanCandidate(patientPhraseMatch[1]);
                 }
             }
-            extractedName = name || "New Patient";
 
+            // Tier C: Cleaned positional word pair fallback
+            if (!name) {
+                let textNoVitals = text.replace(/\b\d+(?:\/\d+)?%?\b/g, '');
+                name = cleanCandidate(textNoVitals);
+            }
+
+            // Guardrail: Never return "NEW PATIENT" or invalid single words
+            if (!name || name.toUpperCase() === "NEW PATIENT" || name.toUpperCase() === "PATIENT" || name.length < 3) {
+                extractedName = "New Patient";
+            } else {
+                extractedName = name;
+            }
+
+            // 3. VITALS EXTRACTION
             let vitals = [];
 
             const bpMatch = text.match(/(?:bp|blood pressure)?\s*(\d{2,3}\/\d{2,3})/i);
@@ -1086,6 +1189,7 @@
 
             extractedVitals = vitals.length > 0 ? vitals.join(' | ') : 'Vitals Stable / Not Stated';
 
+            // 4. MEDICATIONS EXTRACTION
             const medCatalog = ['aspirin', 'epinephrine', 'nitroglycerin', 'albuterol', 'naloxone', 'morphine', 'fentanyl', 'heparin', 'plavix', 'tylenol', 'zofran', 'ativan'];
             let foundMeds = [];
 
@@ -1096,11 +1200,11 @@
             });
             extractedMeds = foundMeds.length > 0 ? foundMeds.join(', ') : 'None Noted';
 
+            // 5. TRIAGE PRIORITY CLASSIFICATION
             let priority = 'Low';
             let tags = [];
             let examSummary = [];
 
-            // Critical evaluation (Red)
             const isCriticalCardiac = lower.includes('stemi') || lower.includes('severe chest pain') || lower.includes('heart attack') || lower.includes('substernal') || lower.includes('pain to jaw') || lower.includes('pulsatile') || lower.includes('aaa');
             const isCriticalNeuro = lower.includes('stroke') || lower.includes('facial droop') || lower.includes('aphasic') || lower.includes('unequal pupils') || gcs <= 13;
             const isCriticalResp = o2Val < 90 || lower.includes('severe shortness of breath') || lower.includes('respiratory failure') || lower.includes("can't breathe") || lower.includes('tripoding') || lower.includes('silent') || (lower.includes('wheezing') && lower.includes('swelling'));
@@ -1109,7 +1213,6 @@
             const isCriticalAnaphylaxis = lower.includes('anaphylaxis') || (lower.includes('ate peanuts') && lower.includes('swelling')) || (lower.includes('hives') && lower.includes('swelling') && sysBP < 90);
             const isHypotensive = sysBP < 90;
 
-            // Moderate evaluation (Orange / Medium)
             const isExplicitModerate = lower.includes('moderate') || lower.includes('orange') || lower.includes('medium') || lower.includes('urgent');
             const isModerateClinical = lower.includes('abdominal') || lower.includes('fever') || lower.includes('vomiting') || lower.includes('emesis') || lower.includes('fracture') || lower.includes('laceration') || lower.includes('dehydration') || lower.includes('dizzy') || lower.includes('dizziness') || lower.includes('syncope') || lower.includes('chest pain') || lower.includes('shortness of breath') || lower.includes('sob');
             const isSevereHypertension = sysBP >= 180;
@@ -1188,6 +1291,7 @@
             processConfirmationSuccess();
         }
 
+        // Add Patient to Queue with Dark Mode Colors
         function addPatientToQueue(name, age, summary, priority, vitals, meds) {
             const queueList = document.getElementById('patient-queue-list');
             const timestamp = get12HourTimestamp();
@@ -1195,21 +1299,22 @@
             let normPrio = priority.toUpperCase();
             if (normPrio === 'MODERATE' || normPrio === 'ORANGE') normPrio = 'MEDIUM';
 
-let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
-            let colorBadgeDark = "dark:bg-blue-900 dark:text-blue-300";
+            let cardBgLightDark = "bg-blue-50 dark:bg-blue-950/80 border-blue-500";
+            let badgeClasses = "text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-900";
+
             if (normPrio === 'CRITICAL') {
-                colorBorder = "border-red-500 bg-red-50 text-red-600 bg-red-100";
-                colorBadgeDark = "dark:bg-red-900 dark:text-red-300";
+                cardBgLightDark = "bg-red-50 dark:bg-red-950/80 border-red-500";
+                badgeClasses = "text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900";
             } else if (normPrio === 'MEDIUM') {
-                colorBorder = "border-orange-500 bg-orange-50 text-orange-600 bg-orange-100";
-                colorBadgeDark = "dark:bg-orange-900 dark:text-orange-300";
+                cardBgLightDark = "bg-amber-50 dark:bg-amber-950/80 border-amber-500";
+                badgeClasses = "text-amber-700 dark:text-amber-300 bg-amber-100 dark:bg-amber-900";
             }
 
             const ageLabel = age ? `, ${age}` : '';
             const medsLabel = (meds && meds !== 'None Noted') ? ` | Meds: ${meds}` : '';
 
             const newCard = document.createElement('div');
-            newCard.className = `patient-card border-l-4 ${colorBorder.split(' ')[0]} ${colorBorder.split(' ')[1]} dark:bg-gray-800 p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
+            newCard.className = `patient-card border-l-4 ${cardBgLightDark} p-3 rounded shadow-sm relative group transition-all transform hover:scale-[1.01]`;
             newCard.setAttribute('draggable', 'true');
             newCard.setAttribute('data-priority', normPrio);
             newCard.setAttribute('data-name', name);
@@ -1222,7 +1327,7 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
             newCard.innerHTML = `
                 <div class="flex justify-between font-bold items-center pr-6">
                     <span class="text-gray-900 dark:text-gray-100">${name}${ageLabel}</span>
-                    <span class="${colorBorder.split(' ')[2]} text-xs px-2 py-0.5 ${colorBorder.split(' ')[3]} ${colorBadgeDark} rounded-full uppercase">${normPrio}</span>
+                    <span class="${badgeClasses} text-xs px-2 py-0.5 rounded-full uppercase">${normPrio}</span>
                 </div>
                 <div class="text-xs font-semibold text-gray-800 dark:text-gray-100 mt-1">${summary}</div>
                 <div class="text-xs text-gray-500 dark:text-gray-300 mt-1">${vitals}${medsLabel}</div>
@@ -1245,12 +1350,13 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
             clearTimeout(silenceTimer);
             mode = 'idle';
             fullTranscriptStore = '';
+            isBotSpeaking = false;
 
             const micBtn = document.getElementById('mic-btn');
             micBtn.className = "bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg hover:bg-blue-700 transition";
             micBtn.innerHTML = '<i class="fa-solid fa-microphone text-2xl"></i>';
 
-            document.getElementById('triage-status').className = "bg-gray-100 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 text-sm";
+            document.getElementById('triage-status').className = "bg-gray-100 dark:bg-gray-700 dark:text-gray-200 rounded-lg p-3 mb-4 text-center font-semibold text-gray-600 text-sm";
             document.getElementById('triage-status').innerText = 'System Idle. Press the microphone button to start dictating.';
             document.getElementById('transcript-box').innerHTML = '<span class="text-gray-400 dark:text-gray-500 italic">Live transcript will appear here...</span>';
             document.getElementById('extracted-meta').classList.add('hidden');
@@ -1259,7 +1365,7 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
         }
 
         /* =========================================================
-           PATIENT / FAMILY MODULE — Multi-patient dashboard
+           PATIENT / FAMILY MODULE
            ========================================================= */
 
         const USER_DATA = {
@@ -1325,7 +1431,6 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
             document.getElementById('user-home-view').classList.add('hidden');
             document.getElementById('user-detail-view').classList.remove('hidden');
 
-            // Banner Setup
             const banner = document.getElementById('detail-status-banner');
             const icon = document.getElementById('detail-banner-icon');
             document.getElementById('detail-banner-title').innerText = p.status;
@@ -1340,7 +1445,6 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
                 icon.className = "w-12 h-12 bg-white rounded-full flex items-center justify-center text-2xl text-blue-600";
             }
 
-            // Timeline
             document.getElementById('detail-timeline-list').innerHTML = p.timeline.map(ev => `
                 <div class="relative pl-6">
                     <div class="absolute -left-2 top-1 w-4 h-4 rounded-full ${ev.color} border-4 border-white"></div>
@@ -1349,7 +1453,6 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
                 </div>
             `).join('');
 
-            // Updates
             document.getElementById('detail-content-updates').innerHTML = p.updates.map(u => `
                 <div class="bg-white dark:bg-gray-700 border dark:border-gray-600 rounded-lg p-3">
                     <div class="flex justify-between font-bold text-[11px] mb-1"><span class="text-gray-800 dark:text-gray-100">${u.title}</span><span class="text-gray-400 dark:text-gray-300">${u.time}</span></div>
@@ -1399,38 +1502,6 @@ let colorBorder = "border-blue-500 bg-blue-50 text-blue-600 bg-blue-100";
             closeEditContactModal();
         });
 
-        function simulateSendSMS() {
-    const phone = primaryContact.phone;
-    const message =
-`The ER: Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
-
-This message contains a secure link to view live updates about their condition:
-https://sensational-eclair-18fc33.netlify.app
-
-A unique QR code is also available inside the app for sharing with other family members.`;
-
-    alert(
-        'DEMO SMS PREVIEW\n\n' +
-        'To: ' + phone + '\n\n' +
-        message +
-        '\n\n(In a real deployment, this would be sent via an SMS gateway like Twilio.)'
-    );
-}
-
-        function simulateSendSMS() {
-            const msg =
-`SMS to ${primaryContact.name} (${primaryContact.phone}):
-
-Your family member James Henderson has been detected in the Emergency Department at Main Hospital.
-
-This message contains a secure link to view live updates about their condition.
-Link: https://sensational-eclair-18fc33.netlify.app
-
-A unique QR code is also available inside the app for sharing with other family members.`;
-
-            alert('TEST SMS SENT\n\n' + msg);
-        }
-
         function copyShareLink() {
             const fakeLink = 'https://sensational-eclair-18fc33.netlify.app';
             navigator.clipboard.writeText(fakeLink).then(() => {
@@ -1438,64 +1509,6 @@ A unique QR code is also available inside the app for sharing with other family 
             }).catch(() => {
                 alert('Link: ' + fakeLink);
             });
-        }
-
-                let qrCodeObj = null;
-
-        function generateQRCode() {
-            const container = document.getElementById('qrcode-container');
-            container.innerHTML = ''; // clear old
-
-            const shareLink = 'https://sensational-eclair-18fc33.netlify.app';
-
-            qrCodeObj = new QRCode(container, {
-                text: shareLink,
-                width: 160,
-                height: 160,
-                colorDark: "#000000",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
-            });
-        }
-
-        function downloadQRCode() {
-            const container = document.getElementById('qrcode-container');
-            const canvas = container.querySelector('canvas');
-            if (!canvas) {
-                alert('QR code not generated yet.');
-                return;
-            }
-
-            const link = document.createElement('a');
-            link.download = 'ER_Family_Share_QR.png';
-            link.href = canvas.toDataURL('image/png');
-            link.click();
-        }
-
-                function initPatientView() {
-            const patientName = 'James Henderson';
-            document.getElementById('patient-display-name').innerText = patientName;
-            document.getElementById('qr-patient-name').innerText = patientName;
-            document.getElementById('home-patient-name').innerText = patientName;
-
-            const banner = document.getElementById('patient-status-banner');
-            const title = document.getElementById('patient-status-title');
-            const subtitle = document.getElementById('patient-status-subtitle');
-
-            banner.className = 'bg-red-600 text-white p-4';
-            title.innerText = 'Critical Emergency';
-            subtitle.innerText = 'Cath Lab Activation Pending';
-
-            document.getElementById('home-status-title').innerText = 'Critical Emergency';
-            document.getElementById('home-status-subtitle').innerText = 'Cath Lab Activation Pending';
-
-            renderPatientTimeline();
-            renderUpdatesList();
-            renderPrimaryContact();
-            switchPatientTab('home');
-
-            // Generate QR code for Share tab
-            generateQRCode();
         }
     </script>
 </body>
