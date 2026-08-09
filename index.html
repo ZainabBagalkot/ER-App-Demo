@@ -196,6 +196,9 @@
                         <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 p-1" title="Cancel Patient">
                             <i class="fa-solid fa-xmark text-base"></i>
                         </button>
+                        <button onclick="editPatient(this)" class="absolute bottom-2 right-2 text-gray-400 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-1" title="Edit Patient">
+                            <i class="fa-solid fa-pen text-xs"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -333,6 +336,49 @@
                 <div class="flex gap-2 pt-2">
                     <button type="button" onclick="closeEditContactModal()" class="flex-1 bg-gray-100 dark:bg-gray-700 dark:text-gray-100 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
                     <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-bold">Save</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- EDIT PATIENT MODAL (Hospital Staff) -->
+    <div id="edit-patient-modal" class="hidden fixed inset-0 bg-black/50 z-[70] flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-xl w-full max-w-md p-5">
+            <h3 class="font-bold text-gray-800 dark:text-gray-100 mb-4 text-sm uppercase"><i class="fa-solid fa-pen mr-1"></i>Edit Patient</h3>
+            <form id="edit-patient-form" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Name</label>
+                    <input type="text" id="ept-name" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" required>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Age / Gender</label>
+                        <input type="text" id="ept-age" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="62M">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Severity</label>
+                        <select id="ept-priority" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100">
+                            <option value="CRITICAL">CRITICAL</option>
+                            <option value="MEDIUM">MEDIUM</option>
+                            <option value="LOW">LOW</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Details / Findings</label>
+                    <input type="text" id="ept-summary" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="Acute STEMI / Chest Pain">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Vitals</label>
+                    <input type="text" id="ept-vitals" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="BP 90/60 | HR 110 | SpO2 94%">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">Medications</label>
+                    <input type="text" id="ept-meds" class="w-full px-3 py-2 border rounded-lg text-sm border-gray-300 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-100" placeholder="None Noted">
+                </div>
+                <div class="flex gap-2 pt-2">
+                    <button type="button" onclick="closeEditPatientModal()" class="flex-1 bg-gray-100 dark:bg-gray-700 dark:text-gray-100 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 dark:hover:bg-gray-600">Cancel</button>
+                    <button type="submit" class="flex-1 bg-blue-600 text-white py-2 rounded-lg text-sm font-bold hover:bg-blue-700">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -610,6 +656,80 @@
             }
         }
 
+// Edit Patient (Hospital Staff)
+        let editingPatientCard = null;
+
+        function editPatient(btn) {
+            const card = btn.closest('.patient-card');
+            if (!card) return;
+            editingPatientCard = card;
+
+            document.getElementById('ept-name').value = card.getAttribute('data-name') || '';
+            document.getElementById('ept-age').value = card.getAttribute('data-age') || '';
+            const priority = (card.getAttribute('data-priority') || 'LOW').toUpperCase();
+            document.getElementById('ept-priority').value = (priority === 'MODERATE' || priority === 'ORANGE') ? 'MEDIUM' : priority;
+            document.getElementById('ept-summary').value = card.getAttribute('data-summary') || '';
+            document.getElementById('ept-vitals').value = card.getAttribute('data-vitals') || '';
+            document.getElementById('ept-meds').value = card.getAttribute('data-meds') || 'None Noted';
+
+            document.getElementById('edit-patient-modal').classList.remove('hidden');
+            document.getElementById('ept-name').focus();
+        }
+
+        function closeEditPatientModal() {
+            document.getElementById('edit-patient-modal').classList.add('hidden');
+            editingPatientCard = null;
+        }
+
+        document.getElementById('edit-patient-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const card = editingPatientCard;
+            if (!card) {
+                closeEditPatientModal();
+                return;
+            }
+
+            card.setAttribute('data-name', document.getElementById('ept-name').value.trim() || 'Patient');
+            card.setAttribute('data-age', document.getElementById('ept-age').value.trim());
+            const priority = document.getElementById('ept-priority').value;
+            card.setAttribute('data-priority', priority);
+            card.setAttribute('data-summary', document.getElementById('ept-summary').value.trim());
+            card.setAttribute('data-vitals', document.getElementById('ept-vitals').value.trim());
+            card.setAttribute('data-meds', document.getElementById('ept-meds').value.trim() || 'None Noted');
+
+            // Re-render the card body with the new data (keeps severity colors in sync).
+            const colorMap = {
+                'CRITICAL': { del: true, badge: 'text-red-600 dark:text-red-300 bg-red-100 dark:bg-red-900', card: 'border-red-500 bg-red-50 dark:bg-red-950', text: 'text-red-900 dark:text-red-300' },
+                'MEDIUM': { del: false, badge: 'text-orange-600 dark:text-orange-300 bg-orange-100 dark:bg-orange-900', card: 'border-orange-500 bg-orange-50 dark:bg-orange-950', text: 'text-orange-900 dark:text-orange-300' },
+                'LOW': { del: false, badge: 'text-blue-600 dark:text-blue-300 bg-blue-100 dark:bg-blue-900', card: 'border-blue-500 bg-blue-50 dark:bg-blue-950', text: 'text-blue-900 dark:text-blue-300' }
+            };
+            const colors = colorMap[priority] || colorMap['LOW'];
+            card.className = `patient-card border-l-4 ${colors.card} p-3 rounded shadow-sm relative group transition-all`;
+            card.setAttribute('draggable', 'true');
+            card.innerHTML = `
+                <div class="flex justify-between font-bold items-center pr-6">
+                    <span class="text-gray-900 dark:text-gray-100">${card.getAttribute('data-name')}${card.getAttribute('data-age') ? ', ' + card.getAttribute('data-age') : ''}</span>
+                    <span class="${colors.badge} text-xs px-2 py-0.5 rounded-full uppercase">${priority}</span>
+                </div>
+                <div class="text-xs font-semibold ${colors.text} mt-1">${card.getAttribute('data-summary')}</div>
+                <div class="text-xs text-gray-600 dark:text-gray-300 mt-1">${card.getAttribute('data-vitals')}${card.getAttribute('data-meds') && card.getAttribute('data-meds') !== 'None Noted' ? ' | Meds: ' + card.getAttribute('data-meds') : ''}</div>
+                <div class="text-[10px] text-gray-400 dark:text-gray-300 font-normal mt-1 flex items-center gap-1">
+                    <i class="fa-regular fa-clock"></i>${card.getAttribute('data-time') || get12HourTimestamp()}
+                </div>
+                <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 p-1" title="Cancel Patient">
+                    <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+                <button onclick="editPatient(this)" class="absolute bottom-2 right-2 text-gray-400 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-1" title="Edit Patient">
+                    <i class="fa-solid fa-pen text-xs"></i>
+                </button>
+            `;
+
+            closeEditPatientModal();
+            sortQueueByPriority();
+            updateTriageHistoryView();
+        });
+
+        // Drag & Drop Reordering for Queue
         function initQueueDragAndDrop() {
             const queueList = document.getElementById('patient-queue-list');
             let draggedCard = null;
@@ -1336,6 +1456,9 @@
                 </div>
                 <button onclick="removePatient(this)" class="absolute top-2 right-2 text-gray-400 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 p-1" title="Cancel Patient">
                     <i class="fa-solid fa-xmark text-base"></i>
+                </button>
+                <button onclick="editPatient(this)" class="absolute bottom-2 right-2 text-gray-400 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 p-1" title="Edit Patient">
+                    <i class="fa-solid fa-pen text-xs"></i>
                 </button>
             `;
 
