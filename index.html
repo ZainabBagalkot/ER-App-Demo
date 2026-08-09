@@ -427,6 +427,7 @@
 
         function selectRole(role) {
             selectedRole = role;
+            const isDark = document.documentElement.classList.contains('dark');
             document.querySelectorAll('.role-btn').forEach(btn => {
                 btn.classList.remove('border-blue-500', 'bg-blue-50', 'dark:border-blue-500', 'dark:bg-blue-600');
             });
@@ -436,7 +437,11 @@
             const target = document.getElementById(`role-${role}`);
             target.classList.add('border-blue-500', 'bg-blue-50', 'dark:border-blue-500', 'dark:bg-blue-600');
             const icon = document.getElementById(`role-icon-${role}`);
-            icon.className = icon.className.includes('user-nurse') ? 'fa-solid fa-user-nurse text-2xl text-white mb-2' : 'fa-solid fa-users text-2xl text-white mb-2';
+            if (isDark) {
+                icon.className = icon.className.includes('user-nurse')
+                    ? 'fa-solid fa-user-nurse text-2xl text-white mb-2'
+                    : 'fa-solid fa-users text-2xl text-white mb-2';
+            }
         }
 
         document.getElementById('login-form').addEventListener('submit', function(e) {
